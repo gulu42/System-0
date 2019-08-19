@@ -39,9 +39,9 @@ class System2Agent(Agent): #system 2 is capable of gameplay on its own
         return random.choice(legalMoves) #arb for now
 
 class System0Agent(Agent):
-    def __init__(self,sys1,sys2):
+    def __init__(self,sys1 = Agent(),sys2 = Agent()):
         self.system_1_model = sys1
         self.system_2_model = sys2
 
     def getAction(self,gameState):
-        return random.choice([self.system_1_model.getAction(),self.system_2_model.getAction()])
+        return random.choice([self.system_1_model.getAction(gameState),self.system_2_model.getAction(gameState)])

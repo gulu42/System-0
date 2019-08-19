@@ -537,13 +537,19 @@ def readCommand( argv ):
     if args['layout'] == None: raise Exception("The layout " + options.layout + " cannot be found")
 
     # Choose a Pacman agent
-    noKeyboard = options.gameToReplay == None and (options.textGraphics or options.quietGraphics)
+    noKeyboard = options.gameToReplay == None and (options.textGraphics or options.quietGraphics) # a bool value to check whether the keyboard should be used
     pacmanType = loadAgent(options.pacman, noKeyboard)
     agentOpts = parseAgentArgs(options.agentArgs)
     if options.numTraining > 0:
         args['numTraining'] = options.numTraining
         if 'numTraining' not in agentOpts: agentOpts['numTraining'] = options.numTraining
-    pacman = pacmanType(**agentOpts) # Instantiate Pacman with agentArgs
+    if options.pacman == "System0Agent":
+        module_to_use = __import__("3_system_agents")
+        sys1 = getattr(module_to_use,"System1Agent")()
+        sys2 = getattr(module_to_use,"System2Agent")()
+        pacman = pacmanType(sys1 = sys1, sys2 = sys2)
+    else:
+        pacman = pacmanType(**agentOpts) # Instantiate Pacman with agentArgs
     args['pacman'] = pacman
 
     # Don't display training games
