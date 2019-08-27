@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+epochs = 10
+
 class LinearNetwork(nn.Module):
     def __init__(self): #all inits here
         super(LinearNetwork,self).__init__()
@@ -27,26 +29,26 @@ optimizer = optim.Adam(net.parameters(),lr = 0.1)
 df = pd.read_csv("linear_train_data.csv")
 
 
-# ideally have more passes
-for index,row in df.iterrows():
+for e in range(epochs):
+    for index,row in df.iterrows():
 
-    # read dataset entry
-    inp = torch.tensor([row['x1'],row['x2'],row['x3']])
-    target = torch.tensor([row['label']])
+        # read dataset entry
+        inp = torch.tensor([row['x1'],row['x2'],row['x3']])
+        target = torch.tensor([row['label']])
 
-    #get network output
-    out = net(inp)
+        #get network output
+        out = net(inp)
 
-    #calculate loss
-    loss = loss_criterion(out,target)
-    print("Loss - pass",index,": ",loss)
+        #calculate loss
+        loss = loss_criterion(out,target)
+        print("Loss - pass",index,": ",loss)
 
-    # update network weights, backprop and weight update
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+        # update network weights, backprop and weight update
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
-print("\nTesting:")
+    print("\nTesting:")
 
 df = pd.read_csv("linear_test_data.csv")
 
