@@ -11,8 +11,7 @@ from __future__ import print_function
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
-
-
+import pandas as pd
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -299,28 +298,49 @@ def betterEvaluationFunction(currentGameState):
     print("Walls:")
     print(currentGameState.getWalls())
     print("==================================")
-    
-    filename = "data.csv"
-    rows = list()
-    filename = "data.csv"
-    rows = [currentGameState.getPacmanPosition()[0],currentGameState.getPacmanPosition()[1], \
-    currentGameState.getGhostPositions()[0][0],currentGameState.getGhostPositions()[0][1], \
-    currentGameState.getGhostPositions()[1][0],currentGameState.getGhostPositions()[1][1] , \
-    currentGameState.getNumFood(), currentGameState.getScore() , currentGameState.getNumFood()]
-    for i in range(len(currentGameState.getCapsules())):
-        rows.append(currentGameState.getCapsules()[i][0])
-        rows.append(currentGameState.getCapsules()[i][1])
-    for i in range(20):
-        for j in range(7):
-            currentGameState.getWalls()[i][j] = -1*currentGameState.getWalls()[i][j]
-    for i in range(20):
-        for j in range(7):        
-            rows.append(currentGameState.getFood()[i][j] + currentGameState.getWalls()[i][j])    
-    with open(filename, 'a') as csvfile:
-        csvwriter = csv.writer(csvfile)
-        # csvwriter.writerow(fields)
-        csvwriter.writerow(rows)
-
+    try:
+        filename = "data.csv"
+        df1 = pd.read_csv(filename)
+        rows = list()
+        rows = [currentGameState.getPacmanPosition()[0],currentGameState.getPacmanPosition()[1], \
+        currentGameState.getGhostPositions()[0][0],currentGameState.getGhostPositions()[0][1], \
+        currentGameState.getGhostPositions()[1][0],currentGameState.getGhostPositions()[1][1] , \
+        currentGameState.getNumFood(), currentGameState.getScore() ]
+        for i in range(len(currentGameState.getCapsules())):
+            rows.append(currentGameState.getCapsules()[i][0])
+            rows.append(currentGameState.getCapsules()[i][1])
+        for i in range(20):
+            for j in range(7):
+                currentGameState.getWalls()[i][j] = -1*currentGameState.getWalls()[i][j]
+        for i in range(20):
+            for j in range(7):        
+                rows.append(currentGameState.getFood()[i][j] + currentGameState.getWalls()[i][j])
+        df = pd.DataFrame(columns = df1.columns.tolist())
+        df.loc[0] = rows
+        df.to_csv ("data.csv", index = None,mode='a', header=False)
+    except pd.io.common.EmptyDataError:
+        rows = list()
+        rows = [currentGameState.getPacmanPosition()[0],currentGameState.getPacmanPosition()[1], \
+        currentGameState.getGhostPositions()[0][0],currentGameState.getGhostPositions()[0][1], \
+        currentGameState.getGhostPositions()[1][0],currentGameState.getGhostPositions()[1][1] , \
+        currentGameState.getNumFood(), currentGameState.getScore()]
+        columns = ["PacmanPosition_X", "PacmanPosition_Y", "Ghost1Positions_X","Ghost1Positions_Y" \
+            , "Ghost2Positions_X","Ghost2Positions_Y" ,"NumFood" , "Score" ]
+        for i in range(len(currentGameState.getCapsules())):
+            rows.append(currentGameState.getCapsules()[i][0])
+            rows.append(currentGameState.getCapsules()[i][1])
+            columns.append("Capsules" + str(i) + "X")
+            columns.append("Capsules" + str(i) + "Y")
+        for i in range(20):
+            for j in range(7):
+                currentGameState.getWalls()[i][j] = -1*currentGameState.getWalls()[i][j]
+        for i in range(20):
+            for j in range(7):        
+                rows.append(currentGameState.getFood()[i][j] + currentGameState.getWalls()[i][j])
+                columns.append("Grid" + str(i) + "_" + str(j))
+        df = pd.DataFrame(columns = columns)
+        df.append(rows)        
+        df.to_csv ("data.csv", index = None, header=True)
     min_food_distance = -1
     for food in newFoodList:
         distance = util.manhattanDistance(newPos, food)
