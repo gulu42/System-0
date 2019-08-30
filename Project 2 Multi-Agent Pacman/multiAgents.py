@@ -16,6 +16,7 @@ from __future__ import print_function
 from util import manhattanDistance
 from game import Directions
 import random, util
+import csv
 
 from game import Agent
 
@@ -284,7 +285,7 @@ def betterEvaluationFunction(currentGameState):
     newPos = currentGameState.getPacmanPosition()
     newFood = currentGameState.getFood()
     newFoodList = newFood.asList()
-    print("Pacman data: ")
+    print("Pacman data: " )
     print("Pacman State: ",currentGameState.getPacmanState())
     print("Pacman Position: ",currentGameState.getPacmanPosition())
     print("Ghost States: ",currentGameState.getGhostStates())
@@ -298,6 +299,28 @@ def betterEvaluationFunction(currentGameState):
     print("Walls:")
     print(currentGameState.getWalls())
     print("==================================")
+    
+    filename = "data.csv"
+    rows = list()
+    filename = "data.csv"
+    rows = [currentGameState.getPacmanPosition()[0],currentGameState.getPacmanPosition()[1], \
+    currentGameState.getGhostPositions()[0][0],currentGameState.getGhostPositions()[0][1], \
+    currentGameState.getGhostPositions()[1][0],currentGameState.getGhostPositions()[1][1] , \
+    currentGameState.getNumFood(), currentGameState.getScore() , currentGameState.getNumFood()]
+    for i in range(len(currentGameState.getCapsules())):
+        rows.append(currentGameState.getCapsules()[i][0])
+        rows.append(currentGameState.getCapsules()[i][1])
+    for i in range(20):
+        for j in range(7):
+            currentGameState.getWalls()[i][j] = -1*currentGameState.getWalls()[i][j]
+    for i in range(20):
+        for j in range(7):        
+            rows.append(currentGameState.getFood()[i][j] + currentGameState.getWalls()[i][j])    
+    with open(filename, 'a') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        # csvwriter.writerow(fields)
+        csvwriter.writerow(rows)
+
     min_food_distance = -1
     for food in newFoodList:
         distance = util.manhattanDistance(newPos, food)
