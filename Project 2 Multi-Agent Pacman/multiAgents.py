@@ -284,41 +284,22 @@ def betterEvaluationFunction(currentGameState):
     newPos = currentGameState.getPacmanPosition()
     newFood = currentGameState.getFood()
     newFoodList = newFood.asList()
-    print("Pacman data: " )
-    print("Pacman State: ",currentGameState.getPacmanState())
-    print("Pacman Position: ",currentGameState.getPacmanPosition())
-    print("Ghost States: ",currentGameState.getGhostStates())
-    print("Ghost Positions: ",currentGameState.getGhostPositions())
-    print("Num Agents: ",currentGameState.getNumAgents())
-    print("Score: ",currentGameState.getScore())
-    print("Capsules Left: ",currentGameState.getCapsules())
-    print("Food left: ",currentGameState.getNumFood())
-    print("Food:")
-    print(currentGameState.getFood())
-    print("Walls:")
-    print(currentGameState.getWalls())
-    print("==================================")
+    # print("Pacman data: " )
+    # print("Pacman State: ",currentGameState.getPacmanState())
+    # print("Pacman Position: ",currentGameState.getPacmanPosition())
+    # print("Ghost States: ",currentGameState.getGhostStates())
+    # print("Ghost Positions: ",currentGameState.getGhostPositions())
+    # print("Num Agents: ",currentGameState.getNumAgents())
+    # print("Score: ",currentGameState.getScore())
+    # print("Capsules Left: ",currentGameState.getCapsules())
+    # print("Food left: ",currentGameState.getNumFood())
+    # print("Food:")
+    # print(currentGameState.getFood())
+    # print("Walls:")
+    # print(currentGameState.getWalls())
+    # print("==================================")
     try:
-        filename = "data.csv"
-        df1 = pd.read_csv(filename)
-        rows = list()
-        rows = [currentGameState.getPacmanPosition()[0],currentGameState.getPacmanPosition()[1], \
-        currentGameState.getGhostPositions()[0][0],currentGameState.getGhostPositions()[0][1], \
-        currentGameState.getGhostPositions()[1][0],currentGameState.getGhostPositions()[1][1] , \
-        currentGameState.getNumFood(), currentGameState.getScore() ]
-        for i in range(len(currentGameState.getCapsules())):
-            rows.append(currentGameState.getCapsules()[i][0])
-            rows.append(currentGameState.getCapsules()[i][1])
-        for i in range(20):
-            for j in range(7):
-                currentGameState.getWalls()[i][j] = -1*currentGameState.getWalls()[i][j]
-        for i in range(20):
-            for j in range(7):        
-                rows.append(currentGameState.getFood()[i][j] + currentGameState.getWalls()[i][j])
-        df = pd.DataFrame(columns = df1.columns.tolist())
-        df.loc[0] = rows
-        df.to_csv ("data.csv", index = None,mode='a', header=False)
-    except pd.io.common.EmptyDataError:
+        columns = list()
         rows = list()
         rows = [currentGameState.getPacmanPosition()[0],currentGameState.getPacmanPosition()[1], \
         currentGameState.getGhostPositions()[0][0],currentGameState.getGhostPositions()[0][1], \
@@ -339,7 +320,31 @@ def betterEvaluationFunction(currentGameState):
                 rows.append(currentGameState.getFood()[i][j] + currentGameState.getWalls()[i][j])
                 columns.append("Grid" + str(i) + "_" + str(j))
         df = pd.DataFrame(columns = columns)
-        df.append(rows)        
+        df.loc[len(df)] = rows
+        df.to_csv ("data.csv", index = None,mode='a', header=False)
+    except pd.io.common.EmptyDataError:
+        columns = list()
+        rows = list()
+        rows = [currentGameState.getPacmanPosition()[0],currentGameState.getPacmanPosition()[1], \
+        currentGameState.getGhostPositions()[0][0],currentGameState.getGhostPositions()[0][1], \
+        currentGameState.getGhostPositions()[1][0],currentGameState.getGhostPositions()[1][1] , \
+        currentGameState.getNumFood(), currentGameState.getScore()]
+        columns = ["PacmanPosition_X", "PacmanPosition_Y", "Ghost1Positions_X","Ghost1Positions_Y" \
+            , "Ghost2Positions_X","Ghost2Positions_Y" ,"NumFood" , "Score" ]
+        for i in range(len(currentGameState.getCapsules())):
+            rows.append(currentGameState.getCapsules()[i][0])
+            rows.append(currentGameState.getCapsules()[i][1])
+            columns.append("Capsules" + str(i) + "X")
+            columns.append("Capsules" + str(i) + "Y")
+        for i in range(20):
+            for j in range(7):
+                currentGameState.getWalls()[i][j] = -1*currentGameState.getWalls()[i][j]
+        for i in range(20):
+            for j in range(7):        
+                rows.append(currentGameState.getFood()[i][j] + currentGameState.getWalls()[i][j])
+                columns.append("Grid" + str(i) + "_" + str(j))
+        df = pd.DataFrame(columns = columns)
+        df.append(rows)
         df.to_csv ("data.csv", index = None, header=True)
     min_food_distance = -1
     for food in newFoodList:
