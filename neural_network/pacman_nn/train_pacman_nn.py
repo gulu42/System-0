@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-epochs = 1
+epochs = 5
 
 class PacmanNetwork(nn.Module):
     def __init__(self): #all inits here
@@ -67,7 +67,7 @@ for e in range(epochs):
     for index,row in df.iterrows():
 
         # get input and target
-        inp = torch.FloatTensor(row[inp_columns])
+        inp = torch.FloatTensor(map(float, row[inp_columns]))
         target[0] = get_class_given_action(row["Action"])
 
         # Get network output

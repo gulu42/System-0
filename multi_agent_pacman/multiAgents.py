@@ -291,11 +291,25 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             gameState.getNumFood(), gameState.getScore()]
             columns = ["PacmanPosition_X", "PacmanPosition_Y", "Ghost1Positions_X","Ghost1Positions_Y" \
                 , "Ghost2Positions_X","Ghost2Positions_Y" ,"NumFood" , "Score" ]
-            for i in range(len(gameState.getCapsules())):
-                rows.append(gameState.getCapsules()[i][0])
-                rows.append(gameState.getCapsules()[i][1])
+
+            for i in range(2):
                 columns.append("Capsules" + str(i) + "X")
                 columns.append("Capsules" + str(i) + "Y")
+
+            if len(gameState.getCapsules()) == 2:
+                for i in range(len(gameState.getCapsules())):
+                    rows.append(gameState.getCapsules()[i][0])
+                    rows.append(gameState.getCapsules()[i][1])
+            elif len(gameState.getCapsules()) == 1:
+                for i in range(len(gameState.getCapsules())):
+                    rows.append(gameState.getCapsules()[i][0])
+                    rows.append(gameState.getCapsules()[i][1])
+                rows.append(-1)
+                rows.append(-1)
+            else:
+                for i in range(4):
+                    rows.append(-1)
+
             for i in range(20):
                 for j in range(7):
                     gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
@@ -305,6 +319,13 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                     columns.append("Grid" + str(i) + "_" + str(j))
             columns.append("Action")
             rows.append(action)
+            print(len(rows))
+            if len(rows) != 153:
+                print("something went wrong!!!")
+                print("columns: ",columns)
+                print("rows: ",rows)
+                print("len columns: ",len(columns))
+                print("len rows: ",len(rows))
             df = pd.DataFrame(columns = columns)
             df.loc[len(df)] = rows
             df.to_csv ("data.csv", index = None,mode='a', header=False)
@@ -317,11 +338,29 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             gameState.getNumFood(), gameState.getScore()]
             columns = ["PacmanPosition_X", "PacmanPosition_Y", "Ghost1Positions_X","Ghost1Positions_Y" \
                 , "Ghost2Positions_X","Ghost2Positions_Y" ,"NumFood" , "Score" ]
-            for i in range(len(gameState.getCapsules())):
-                rows.append(gameState.getCapsules()[i][0])
-                rows.append(gameState.getCapsules()[i][1])
+            # for i in range(len(gameState.getCapsules())):
+            #     rows.append(gameState.getCapsules()[i][0])
+            #     rows.append(gameState.getCapsules()[i][1])
+            #     columns.append("Capsules" + str(i) + "X")
+            #     columns.append("Capsules" + str(i) + "Y")
+            for i in range(2):
                 columns.append("Capsules" + str(i) + "X")
                 columns.append("Capsules" + str(i) + "Y")
+
+            if len(gameState.getCapsules()) == 2:
+                for i in range(len(gameState.getCapsules())):
+                    rows.append(gameState.getCapsules()[i][0])
+                    rows.append(gameState.getCapsules()[i][1])
+            elif len(gameState.getCapsules()) == 1:
+                for i in range(len(gameState.getCapsules())):
+                    rows.append(gameState.getCapsules()[i][0])
+                    rows.append(gameState.getCapsules()[i][1])
+                rows.append(-1)
+                rows.append(-1)
+            else:
+                for i in range(4):
+                    rows.append(-1)
+
             for i in range(20):
                 for j in range(7):
                     gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
@@ -329,7 +368,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 for j in range(7):
                     rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
                     columns.append("Grid" + str(i) + "_" + str(j))
-            columns.append("Action")            
+            columns.append("Action")
             df = pd.DataFrame(columns = columns)
             df.append(rows)
             df.to_csv ("data.csv", index = None, header=True)
