@@ -325,7 +325,6 @@ def betterEvaluationFunction(currentGameState):
         df.to_csv ("data.csv", index = None,mode='a', header=False)
         # print("wrote to a csv")
     except:
-        print("came here")
         columns = list()
         rows = list()
         rows = [currentGameState.getPacmanPosition()[0],currentGameState.getPacmanPosition()[1], \

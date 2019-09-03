@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-epochs = 10
+epochs = 1
 
 class LinearNetwork(nn.Module):
     def __init__(self): #all inits here
