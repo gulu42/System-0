@@ -316,13 +316,16 @@ def betterEvaluationFunction(currentGameState):
             for j in range(7):
                 currentGameState.getWalls()[i][j] = -1*currentGameState.getWalls()[i][j]
         for i in range(20):
-            for j in range(7):        
+            for j in range(7):
                 rows.append(currentGameState.getFood()[i][j] + currentGameState.getWalls()[i][j])
                 columns.append("Grid" + str(i) + "_" + str(j))
         df = pd.DataFrame(columns = columns)
         df.loc[len(df)] = rows
+        # print("Made it here")
         df.to_csv ("data.csv", index = None,mode='a', header=False)
-    except pd.io.common.EmptyDataError:
+        # print("wrote to a csv")
+    except:
+        print("came here")
         columns = list()
         rows = list()
         rows = [currentGameState.getPacmanPosition()[0],currentGameState.getPacmanPosition()[1], \
@@ -340,7 +343,7 @@ def betterEvaluationFunction(currentGameState):
             for j in range(7):
                 currentGameState.getWalls()[i][j] = -1*currentGameState.getWalls()[i][j]
         for i in range(20):
-            for j in range(7):        
+            for j in range(7):
                 rows.append(currentGameState.getFood()[i][j] + currentGameState.getWalls()[i][j])
                 columns.append("Grid" + str(i) + "_" + str(j))
         df = pd.DataFrame(columns = columns)
