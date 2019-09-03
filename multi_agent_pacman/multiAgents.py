@@ -248,72 +248,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         def expectimax(agent, depth, gameState):
-            # print("Pacman data: " )
-            # print("Pacman State: ",gameState.getPacmanState())
-            # print("Pacman Position: ",gameState.getPacmanPosition())
-            # print("Ghost States: ",gameState.getGhostStates())
-            # print("Ghost Positions: ",gameState.getGhostPositions())
-            # print("Num Agents: ",gameState.getNumAgents())
-            # print("Score: ",gameState.getScore())
-            # print("Capsules Left: ",gameState.getCapsules())
-            # print("Food left: ",gameState.getNumFood())
-            # print("Food:")
-            # print(gameState.getFood())
-            # print("Walls:")
-            # print(gameState.getWalls())
-            # print("==================================")
-            if(os.stat("data.csv").st_size != 0):
-                columns = list()
-                rows = list()
-                rows = [gameState.getPacmanPosition()[0],gameState.getPacmanPosition()[1], \
-                gameState.getGhostPositions()[0][0],gameState.getGhostPositions()[0][1], \
-                gameState.getGhostPositions()[1][0],gameState.getGhostPositions()[1][1] , \
-                gameState.getNumFood(), gameState.getScore()]
-                columns = ["PacmanPosition_X", "PacmanPosition_Y", "Ghost1Positions_X","Ghost1Positions_Y" \
-                    , "Ghost2Positions_X","Ghost2Positions_Y" ,"NumFood" , "Score" ]
-                for i in range(len(gameState.getCapsules())):
-                    rows.append(gameState.getCapsules()[i][0])
-                    rows.append(gameState.getCapsules()[i][1])
-                    columns.append("Capsules" + str(i) + "X")
-                    columns.append("Capsules" + str(i) + "Y")
-                for i in range(20):
-                    for j in range(7):
-                        gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
-                for i in range(20):
-                    for j in range(7):
-                        rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
-                        columns.append("Grid" + str(i) + "_" + str(j))
-                df = pd.DataFrame(columns = columns)
-                df.loc[len(df)] = rows
-                # print("Made it here")
-                df.to_csv ("data.csv", index = None,mode='a', header=False)
-                # print("wrote to a csv")
-            else:
-                print ("tatti")
-                columns = list()
-                rows = list()
-                rows = [gameState.getPacmanPosition()[0],gameState.getPacmanPosition()[1], \
-                gameState.getGhostPositions()[0][0],gameState.getGhostPositions()[0][1], \
-                gameState.getGhostPositions()[1][0],gameState.getGhostPositions()[1][1] , \
-                gameState.getNumFood(), gameState.getScore()]
-                columns = ["PacmanPosition_X", "PacmanPosition_Y", "Ghost1Positions_X","Ghost1Positions_Y" \
-                    , "Ghost2Positions_X","Ghost2Positions_Y" ,"NumFood" , "Score" ]
-                for i in range(len(gameState.getCapsules())):
-                    rows.append(gameState.getCapsules()[i][0])
-                    rows.append(gameState.getCapsules()[i][1])
-                    columns.append("Capsules" + str(i) + "X")
-                    columns.append("Capsules" + str(i) + "Y")
-                for i in range(20):
-                    for j in range(7):
-                        gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
-                for i in range(20):
-                    for j in range(7):
-                        rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
-                        columns.append("Grid" + str(i) + "_" + str(j))
-                df = pd.DataFrame(columns = columns)
-                df.append(rows)
-                df.to_csv ("data.csv", index = None, header=True)
-
             if gameState.isLose() or gameState.isWin() or depth == self.depth:  # return the utility in case the defined depth is reached or the game is won/lost.
                 return self.evaluationFunction(gameState)
             if agent == 0:  # maximizing for pacman
@@ -334,7 +268,71 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             if utility > maximum or maximum == float("-inf"):
                 maximum = utility
                 action = agentState
-
+        # print("Pacman data: " )
+        # print("Pacman State: ",gameState.getPacmanState())
+        # print("Pacman Position: ",gameState.getPacmanPosition())
+        # print("Ghost States: ",gameState.getGhostStates())
+        # print("Ghost Positions: ",gameState.getGhostPositions())
+        # print("Num Agents: ",gameState.getNumAgents())
+        # print("Score: ",gameState.getScore())
+        # print("Capsules Left: ",gameState.getCapsules())
+        # print("Food left: ",gameState.getNumFood())
+        # print("Food:")
+        # print(gameState.getFood())
+        # print("Walls:")
+        # print(gameState.getWalls())
+        # print("==================================")
+        if(os.stat("data.csv").st_size != 0):
+            columns = list()
+            rows = list()
+            rows = [gameState.getPacmanPosition()[0],gameState.getPacmanPosition()[1], \
+            gameState.getGhostPositions()[0][0],gameState.getGhostPositions()[0][1], \
+            gameState.getGhostPositions()[1][0],gameState.getGhostPositions()[1][1] , \
+            gameState.getNumFood(), gameState.getScore()]
+            columns = ["PacmanPosition_X", "PacmanPosition_Y", "Ghost1Positions_X","Ghost1Positions_Y" \
+                , "Ghost2Positions_X","Ghost2Positions_Y" ,"NumFood" , "Score" ]
+            for i in range(len(gameState.getCapsules())):
+                rows.append(gameState.getCapsules()[i][0])
+                rows.append(gameState.getCapsules()[i][1])
+                columns.append("Capsules" + str(i) + "X")
+                columns.append("Capsules" + str(i) + "Y")
+            for i in range(20):
+                for j in range(7):
+                    gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
+            for i in range(20):
+                for j in range(7):
+                    rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
+                    columns.append("Grid" + str(i) + "_" + str(j))
+            columns.append("Action")
+            rows.append(action)
+            df = pd.DataFrame(columns = columns)
+            df.loc[len(df)] = rows
+            df.to_csv ("data.csv", index = None,mode='a', header=False)
+        else:
+            columns = list()
+            rows = list()
+            rows = [gameState.getPacmanPosition()[0],gameState.getPacmanPosition()[1], \
+            gameState.getGhostPositions()[0][0],gameState.getGhostPositions()[0][1], \
+            gameState.getGhostPositions()[1][0],gameState.getGhostPositions()[1][1] , \
+            gameState.getNumFood(), gameState.getScore()]
+            columns = ["PacmanPosition_X", "PacmanPosition_Y", "Ghost1Positions_X","Ghost1Positions_Y" \
+                , "Ghost2Positions_X","Ghost2Positions_Y" ,"NumFood" , "Score" ]
+            for i in range(len(gameState.getCapsules())):
+                rows.append(gameState.getCapsules()[i][0])
+                rows.append(gameState.getCapsules()[i][1])
+                columns.append("Capsules" + str(i) + "X")
+                columns.append("Capsules" + str(i) + "Y")
+            for i in range(20):
+                for j in range(7):
+                    gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
+            for i in range(20):
+                for j in range(7):
+                    rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
+                    columns.append("Grid" + str(i) + "_" + str(j))
+            columns.append("Action")            
+            df = pd.DataFrame(columns = columns)
+            df.append(rows)
+            df.to_csv ("data.csv", index = None, header=True)
         return action
 
 def betterEvaluationFunction(currentGameState):
