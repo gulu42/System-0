@@ -54,10 +54,62 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
     def __init__(self):
         self.network = PacmanNetwork()
         self.network.load_state_dict(torch.load('../neural_network/pacman_nn/net.pth'))
-
+        self.values = 0
+        self.indicies = 0
     def getAction(self,gameState):
+        columns = list()
+        rows = list()
+        rows = [gameState.getPacmanPosition()[0],gameState.getPacmanPosition()[1], \
+        gameState.getGhostPositions()[0][0],gameState.getGhostPositions()[0][1], \
+        gameState.getGhostPositions()[1][0],gameState.getGhostPositions()[1][1] , \
+        gameState.getNumFood(), gameState.getScore()]
+
+        if len(gameState.getCapsules()) == 2:
+            for i in range(len(gameState.getCapsules())):
+                rows.append(gameState.getCapsules()[i][0])
+                rows.append(gameState.getCapsules()[i][1])
+        elif len(gameState.getCapsules()) == 1:
+            for i in range(len(gameState.getCapsules())):
+                rows.append(gameState.getCapsules()[i][0])
+                rows.append(gameState.getCapsules()[i][1])
+            rows.append(-1)
+            rows.append(-1)
+        else:
+            for i in range(4):
+                rows.append(-1)
+
+        for i in range(20):
+            for j in range(7):
+                gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
+        for i in range(20):
+            for j in range(7):
+                rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
+                columns.append("Grid" + str(i) + "_" + str(j))
+        inp = torch.FloatTensor(map(float, rows))
+        out = self.network(inp) 
+        # self.values, self.indices = out.max(0)
+        print self.values
+        print self.indicies
         legalMoves = gameState.getLegalActions()
-        return random.choice(legalMoves) #arb for now
+        print(legalMoves)
+        max_move = 'Stop'
+        max_prob = 0
+        print out
+        if 'North' in legalMoves and out[0] > max_prob:
+            max_move = 'North'
+            max_prob = out[0]
+        elif 'East' in legalMoves and out[1] > max_prob:
+            max_move = 'East'
+            max_prob = out[1]
+        elif 'South' in legalMoves and out[2] > max_prob:
+            max_move = 'South'
+            max_prob = out[2]
+        elif 'West' in legalMoves and out[3] > max_prob:
+            max_move = 'West'
+            max_prob = out[3]
+        else:
+            return "Stop"
+        return max_move
 
 
 class System2Agent(Agent): #system 2 is capable of gameplay on its own

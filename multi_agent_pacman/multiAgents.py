@@ -319,13 +319,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                     columns.append("Grid" + str(i) + "_" + str(j))
             columns.append("Action")
             rows.append(action)
-            print(len(rows))
-            if len(rows) != 153:
-                print("something went wrong!!!")
-                print("columns: ",columns)
-                print("rows: ",rows)
-                print("len columns: ",len(columns))
-                print("len rows: ",len(rows))
             df = pd.DataFrame(columns = columns)
             df.loc[len(df)] = rows
             df.to_csv ("data.csv", index = None,mode='a', header=False)
