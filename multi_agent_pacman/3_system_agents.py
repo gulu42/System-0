@@ -54,6 +54,7 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
     def __init__(self):
         self.network = PacmanNetwork()
         self.network.load_state_dict(torch.load('../neural_network/pacman_nn/net.pth'))
+        self.s_max = nn.Softmax(dim=1)
         self.values = 0
         self.indicies = 0
     def getAction(self,gameState):
@@ -86,7 +87,8 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
                 rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
                 columns.append("Grid" + str(i) + "_" + str(j))
         inp = torch.FloatTensor(map(float, rows))
-        out = self.network(inp) 
+        out = self.network(inp)
+        out = self.s_max(out.unsqueeze(dim=0)).squeeze(dim=0)
         # self.values, self.indices = out.max(0)
         print self.values
         print self.indicies
