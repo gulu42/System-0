@@ -268,101 +268,56 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             if utility > maximum or maximum == float("-inf"):
                 maximum = utility
                 action = agentState
-        # print("Pacman data: " )
-        # print("Pacman State: ",gameState.getPacmanState())
-        # print("Pacman Position: ",gameState.getPacmanPosition())
-        # print("Ghost States: ",gameState.getGhostStates())
-        # print("Ghost Positions: ",gameState.getGhostPositions())
-        # print("Num Agents: ",gameState.getNumAgents())
-        # print("Score: ",gameState.getScore())
-        # print("Capsules Left: ",gameState.getCapsules())
-        # print("Food left: ",gameState.getNumFood())
-        # print("Food:")
-        # print(gameState.getFood())
-        # print("Walls:")
-        # print(gameState.getWalls())
-        # print("==================================")
+
+
+        # start filling data into the dataframe
+        columns = list()
+        rows = list()
+
+        grid_values = gameState.getWalls()
+
+        # fill walls as -3, -4 for now, will add 1 to it for empty cells
+        for i in range(20):
+            for j in range(7):
+                grid_values[i][j] = -4*gameState.getWalls()[i][j]
+
+        # fill food cells as +3, empty cells as +1
+        for i in range(20):
+            for j in range(7):
+                grid_values[i][j] = 2*gameState.getFood()[i][j] + gameState.getWalls()[i][j] + 1
+
+        # fill pacman position as 0
+        x,y = gameState.getPacmanPosition()
+        grid_values[x][y] = 0
+
+        # fill ghost position as -10
+        for i in range(2):
+            x,y = map(int,gameState.getGhostPositions()[i])
+            grid_values[x][y] = -10
+
+        # fill capsule positions as +10
+        for i in range(len(gameState.getCapsules())):
+            x,y = gameState.getCapsules()[i]
+            grid_values[x][y] = +10
+
+        # fill rows and columns to add to dataset
+        for i in range(20):
+            for j in range(7):
+                rows.append(grid_values[i][j])
+                columns.append("Grid" + str(i) + "_" + str(j))
+
+        # Add action to columns
+        columns.append("Action")
+        rows.append(action)
+
+        print(grid_values)
+
+        df = pd.DataFrame(columns = columns)
         if(os.stat("data.csv").st_size != 0):
-            columns = list()
-            rows = list()
-            rows = [gameState.getPacmanPosition()[0],gameState.getPacmanPosition()[1], \
-            gameState.getGhostPositions()[0][0],gameState.getGhostPositions()[0][1], \
-            gameState.getGhostPositions()[1][0],gameState.getGhostPositions()[1][1] , \
-            gameState.getNumFood(), gameState.getScore()]
-            columns = ["PacmanPosition_X", "PacmanPosition_Y", "Ghost1Positions_X","Ghost1Positions_Y" \
-                , "Ghost2Positions_X","Ghost2Positions_Y" ,"NumFood" , "Score" ]
-
-            for i in range(2):
-                columns.append("Capsules" + str(i) + "X")
-                columns.append("Capsules" + str(i) + "Y")
-
-            if len(gameState.getCapsules()) == 2:
-                for i in range(len(gameState.getCapsules())):
-                    rows.append(gameState.getCapsules()[i][0])
-                    rows.append(gameState.getCapsules()[i][1])
-            elif len(gameState.getCapsules()) == 1:
-                for i in range(len(gameState.getCapsules())):
-                    rows.append(gameState.getCapsules()[i][0])
-                    rows.append(gameState.getCapsules()[i][1])
-                rows.append(-1)
-                rows.append(-1)
-            else:
-                for i in range(4):
-                    rows.append(-1)
-
-            for i in range(20):
-                for j in range(7):
-                    gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
-            for i in range(20):
-                for j in range(7):
-                    rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
-                    columns.append("Grid" + str(i) + "_" + str(j))
-            columns.append("Action")
-            rows.append(action)
-            df = pd.DataFrame(columns = columns)
             df.loc[len(df)] = rows
             df.to_csv ("data.csv", index = None,mode='a', header=False)
+
         else:
-            columns = list()
-            rows = list()
-            rows = [gameState.getPacmanPosition()[0],gameState.getPacmanPosition()[1], \
-            gameState.getGhostPositions()[0][0],gameState.getGhostPositions()[0][1], \
-            gameState.getGhostPositions()[1][0],gameState.getGhostPositions()[1][1] , \
-            gameState.getNumFood(), gameState.getScore()]
-            columns = ["PacmanPosition_X", "PacmanPosition_Y", "Ghost1Positions_X","Ghost1Positions_Y" \
-                , "Ghost2Positions_X","Ghost2Positions_Y" ,"NumFood" , "Score" ]
-            # for i in range(len(gameState.getCapsules())):
-            #     rows.append(gameState.getCapsules()[i][0])
-            #     rows.append(gameState.getCapsules()[i][1])
-            #     columns.append("Capsules" + str(i) + "X")
-            #     columns.append("Capsules" + str(i) + "Y")
-            for i in range(2):
-                columns.append("Capsules" + str(i) + "X")
-                columns.append("Capsules" + str(i) + "Y")
-
-            if len(gameState.getCapsules()) == 2:
-                for i in range(len(gameState.getCapsules())):
-                    rows.append(gameState.getCapsules()[i][0])
-                    rows.append(gameState.getCapsules()[i][1])
-            elif len(gameState.getCapsules()) == 1:
-                for i in range(len(gameState.getCapsules())):
-                    rows.append(gameState.getCapsules()[i][0])
-                    rows.append(gameState.getCapsules()[i][1])
-                rows.append(-1)
-                rows.append(-1)
-            else:
-                for i in range(4):
-                    rows.append(-1)
-
-            for i in range(20):
-                for j in range(7):
-                    gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
-            for i in range(20):
-                for j in range(7):
-                    rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
-                    columns.append("Grid" + str(i) + "_" + str(j))
-            columns.append("Action")
-            df = pd.DataFrame(columns = columns)
             df.append(rows)
             df.to_csv ("data.csv", index = None, header=True)
         return action
