@@ -13,7 +13,7 @@ class PacmanNetwork(nn.Module):
         # self.non_linearity = nn.ReLU()
         self.non_linearity = nn.SELU()
         self.s_max = nn.Softmax(dim=1)
-        self.fc1 = nn.Linear(152,60)
+        self.fc1 = nn.Linear(140,60)
         self.fc2 = nn.Linear(60,20)
         self.fc3 = nn.Linear(20,5)
 
