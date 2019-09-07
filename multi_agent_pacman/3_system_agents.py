@@ -12,14 +12,22 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-
+import sys
 from util import manhattanDistance
 from game import Directions
 import random, util
 import torch
 import torch.nn as nn
+import copy
 
 from game import Agent
+
+sys.path.insert(1,'../neural_network/pacman_nn')
+from train_pacman_nn import PacmanNetwork
+
+temp_net = PacmanNetwork()
+print(type(temp_net))
+print(temp_net)
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -55,32 +63,6 @@ def betterEvaluationFunction(currentGameState):
     """Combination of the above calculated metrics."""
     return currentGameState.getScore() + (1 / float(min_food_distance)) - (1 / float(distances_to_ghosts)) - proximity_to_ghosts - numberOfCapsules
 
-
-# ideally import this network
-class PacmanNetwork(nn.Module):
-    def __init__(self): #all inits here
-        super(PacmanNetwork,self).__init__()
-        # self.non_linearity = nn.ReLU()
-        self.non_linearity = nn.SELU()
-        self.s_max = nn.Softmax(dim=1)
-        self.fc1 = nn.Linear(152,60)
-        self.fc2 = nn.Linear(60,20)
-        self.fc3 = nn.Linear(20,5)
-
-    def forward(self,x): #define the forward pass here
-        x = self.fc1(x)
-        x = self.non_linearity(x)
-        # --------output of first hidden layer
-        x = self.fc2(x)
-        x = self.non_linearity(x)
-        # --------output of second hidden layer
-        x = self.fc3(x)
-        # x = self.s_max(x.unsqueeze(dim=0))
-        # cross entropy applies softmax on its own
-        # Add this to the output of the network when using it later
-        # --------apply softmax and return moves probability
-        return x
-
 class System1Agent(Agent): #system 1 is capable of gameplay on its own
     """
     Code modelling actions of system 1 comes here
@@ -93,34 +75,75 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
         self.values = 0
         self.indicies = 0
     def getAction(self,gameState):
+        # columns = list()
+        # rows = list()
+        # rows = [gameState.getPacmanPosition()[0],gameState.getPacmanPosition()[1], \
+        # gameState.getGhostPositions()[0][0],gameState.getGhostPositions()[0][1], \
+        # gameState.getGhostPositions()[1][0],gameState.getGhostPositions()[1][1] , \
+        # gameState.getNumFood(), gameState.getScore()]
+
+        # if len(gameState.getCapsules()) == 2:
+        #     for i in range(len(gameState.getCapsules())):
+        #         rows.append(gameState.getCapsules()[i][0])
+        #         rows.append(gameState.getCapsules()[i][1])
+        # elif len(gameState.getCapsules()) == 1:
+        #     for i in range(len(gameState.getCapsules())):
+        #         rows.append(gameState.getCapsules()[i][0])
+        #         rows.append(gameState.getCapsules()[i][1])
+        #     rows.append(-1)
+        #     rows.append(-1)
+        # else:
+        #     for i in range(4):
+        #         rows.append(-1)
+
+        # for i in range(20):
+        #     for j in range(7):
+        #         gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
+        # for i in range(20):
+        #     for j in range(7):
+        #         rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
+        #         columns.append("Grid" + str(i) + "_" + str(j))
+        # start filling data into the dataframe
         columns = list()
         rows = list()
-        rows = [gameState.getPacmanPosition()[0],gameState.getPacmanPosition()[1], \
-        gameState.getGhostPositions()[0][0],gameState.getGhostPositions()[0][1], \
-        gameState.getGhostPositions()[1][0],gameState.getGhostPositions()[1][1] , \
-        gameState.getNumFood(), gameState.getScore()]
 
-        if len(gameState.getCapsules()) == 2:
-            for i in range(len(gameState.getCapsules())):
-                rows.append(gameState.getCapsules()[i][0])
-                rows.append(gameState.getCapsules()[i][1])
-        elif len(gameState.getCapsules()) == 1:
-            for i in range(len(gameState.getCapsules())):
-                rows.append(gameState.getCapsules()[i][0])
-                rows.append(gameState.getCapsules()[i][1])
-            rows.append(-1)
-            rows.append(-1)
-        else:
-            for i in range(4):
-                rows.append(-1)
+        # grid_values = gameState.getWalls().shallowCopy()
+        grid_values = [[0 for i in range(7)] for j in range(20)]
 
+        # fill walls as -3, -4 for now, will add 1 to it for empty cells
         for i in range(20):
             for j in range(7):
-                gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
+                grid_values[i][j] = -4*gameState.getWalls()[i][j]
+
+        # fill food cells as +3, empty cells as +1
         for i in range(20):
             for j in range(7):
-                rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
+                grid_values[i][j] = 2*gameState.getFood()[i][j] + gameState.getWalls()[i][j] + 1
+        print(gameState.getWalls())
+        legalMoves = gameState.getLegalActions()
+        print(legalMoves)
+        # fill pacman position as 0
+        x,y = gameState.getPacmanPosition()
+        grid_values[x][y] = 0
+
+        # fill ghost position as -10
+        for i in range(2):
+            x,y = map(int,gameState.getGhostPositions()[i])
+            grid_values[x][y] = -10
+
+        # fill capsule positions as +10
+        for i in range(len(gameState.getCapsules())):
+            x,y = gameState.getCapsules()[i]
+            grid_values[x][y] = +10
+
+        # fill rows and columns to add to dataset
+        for i in range(20):
+            for j in range(7):
+                rows.append(grid_values[i][j])
                 columns.append("Grid" + str(i) + "_" + str(j))
+
+        # print(grid_values)
+
         inp = torch.FloatTensor(map(float, rows))
         out = self.network(inp)
         out = self.s_max(out.unsqueeze(dim=0)).squeeze(dim=0)

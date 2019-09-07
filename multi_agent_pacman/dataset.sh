@@ -1,7 +1,7 @@
-# for run in {1..1000}
-# do
-#   python pacman.py -p ExpectimaxAgent -l smallClassic -a depth=3 -a evalFn=better -q
-# done
+for run in {1..3000}
+do
+  python pacman.py -p ExpectimaxAgent -l smallClassic -a depth=3 -a evalFn=better -q
+done
 SRC_DIR="/home/sarthak/AI/pacman/multi_agent_pacman/data.csv"
 DST_DIR="/home/sarthak/AI/pacman/neural_network/pacman_nn"
 FILEN="data.csv"

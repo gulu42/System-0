@@ -5,7 +5,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-epochs = 5
+epochs = 20
+
+print("came in here")
 
 class PacmanNetwork(nn.Module):
     def __init__(self): #all inits here
@@ -45,42 +47,46 @@ def get_class_given_action(action):
     else:
         return 4
 
-net = PacmanNetwork()
-# net.load_state_dict(torch.load('./net.pth'))
-print("Network:")
-print(net)
 
-# move module to gpu before constructiong optimizer object
-#check availability of GPU and then use cuda to shift model there
-loss_criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(net.parameters(),lr = 0.1)
+if __name__ == "__main__":
+    net = PacmanNetwork()
+    # net.load_state_dict(torch.load('./net.pth'))
+    # print("Network:")
+    # print(net)
 
-df = pd.read_csv("data.csv")
+    # move module to gpu before constructiong optimizer object
+    #check availability of GPU and then use cuda to shift model there
+    loss_criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(net.parameters(),lr = 0.5)
+    print("here too!!")
 
-inp_columns = df.drop('Action',axis=1).columns # the dropped column is not in-place
-num_inp = len(inp_columns)
+    df = pd.read_csv("data.csv")
 
-# Storage for target value
-target = torch.LongTensor(1)
+    inp_columns = df.drop('Action',axis=1).columns # the dropped column is not in-place
+    num_inp = len(inp_columns)
 
-for e in range(epochs):
-    for index,row in df.iterrows():
+    # Storage for target value
+    target = torch.LongTensor(1)
 
-        # get input and target
-        inp = torch.FloatTensor(map(float, row[inp_columns]))
-        target[0] = get_class_given_action(row["Action"])
+    for e in range(epochs):
+        for index,row in df.iterrows():
 
-        # Get network output
-        net_out = net(inp).unsqueeze(dim=0) # unsqueeze to apply cross entropy loss
-        # print(net_out)
+            # get input and target
+            inp = torch.FloatTensor(map(float, row[inp_columns]))
+            target[0] = get_class_given_action(row["Action"])
 
-        # calculate loss
-        loss = loss_criterion(net_out,target)
+            # Get network output
+            net_out = net(inp).unsqueeze(dim=0) # unsqueeze to apply cross entropy loss
+            # print(net_out)
+
+            # calculate loss
+            loss = loss_criterion(net_out,target)
+
+            #update network
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
         print("Loss - pass",index,": ",loss)
 
-        #update network
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
 
-torch.save(net.state_dict(), './net.pth')
+    torch.save(net.state_dict(), './net.pth')

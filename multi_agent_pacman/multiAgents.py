@@ -310,7 +310,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         columns.append("Action")
         rows.append(action)
 
-        print(grid_values)
+        # print(grid_values)
 
         df = pd.DataFrame(columns = columns)
         if(os.stat("data.csv").st_size != 0):
