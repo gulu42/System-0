@@ -7,23 +7,24 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 
 epochs = 5
-batch_size = 10
+batch_size = 5
 
 class PacmanDataset(Dataset):
     """Dataset based on pacman moves"""
 
     def __init__(self, csv_file_name, transform=None):
         self.df = pd.read_csv(csv_file_name)
+        self.df = self.df.drop("Action", axis = 1) # since actions are there in th epacman dataset
         self.transform = transform
 
     def __len__(self):
         return self.df.shape[0]
 
     def __getitem__(self,idx):
-        if torch.is_tesnor(idx):
+        if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        return self.df.iloc[idx]
+        return torch.tensor(self.df.iloc[idx])
 
 class PacmanNetwork(nn.Module):
     def __init__(self): #all inits here
@@ -77,38 +78,28 @@ if __name__ == "__main__":
         net = PacmanNetwork().cuda()
     else:
         net = PacmanNetwork()
-    # net.load_state_dict(torch.load('./net.pth'))
-    # print("Network:")
-    # print(net)
 
     # move module to gpu before constructiong optimizer object
     #check availability of GPU and then use cuda to shift model there
     loss_criterion = nn.KLDivLoss()
     optimizer = optim.Adam(net.parameters(),lr = 0.5)
 
-    df = pd.read_csv("data_shuffle.csv")
-    num_rows = df.shape[0]
+    dataset = PacmanDataset("data_shuffle.csv")
+    trainloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle = True, num_workers=8)
 
-    inp_columns = df.drop(['Action','North','East','South','West'],axis=1).columns # the dropped column is not in-place
-    num_inp = len(inp_columns)
-
-    # Storage for target value
-    target = torch.FloatTensor(4)
+    # inp_columns = df.drop(['Action','North','East','South','West'],axis=1).columns # the dropped column is not in-place
+    # num_inp = len(inp _columns)
 
     for e in range(epochs):
-        for index,row in df.iterrows():
+        # for index,row in df.iterrows():
+        for i,data in enumerate(trainloader,0):
 
             # get input and target
-            inp = torch.FloatTensor(map(float, row[inp_columns]))
-            target[0] = float(row["North"])
-            target[1] = float(row["East"])
-            target[2] = float(row["South"])
-            target[3] = float(row["West"])
+            inp = data[:,:-4] # for each row in th ebatch, pick everything except the last 4 columns (target values)
+            target = data[:,-4:]
 
             # Get network output
-            # net_out = net(inp).unsqueeze(dim=0) # unsqueeze to apply cross entropy loss
             net_out = net(inp) # network has a log softmax as the last layer
-            # print(net_out)
 
             # calculate loss
             loss = loss_criterion(net_out,target)
@@ -117,6 +108,6 @@ if __name__ == "__main__":
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-        print("Loss - pass",index,": ",loss)
+        print("Loss - epoch",e,": ",loss)
 
     torch.save(net.state_dict(), './mini_net.pth')
