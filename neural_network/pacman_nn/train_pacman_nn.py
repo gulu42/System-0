@@ -5,8 +5,24 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-epochs = 2
-batch_size = 20
+epochs = 5
+batch_size = 10
+
+class PacmanDataset(Dataset):
+    """Dataset based on pacman moves"""
+
+    def __init__(self, csv_file_name, transform=None):
+        self.df = pd.read_csv(csv_file_name)
+        self.transform = transform
+
+    def __len__(self):
+        return self.df.shape[0]
+
+    def __getitem__(self,idx):
+        if torch.is_tesnor(idx):
+            idx = idx.tolist()
+
+        return self.df.iloc[idx]
 
 class PacmanNetwork(nn.Module):
     def __init__(self): #all inits here
@@ -30,7 +46,7 @@ class PacmanNetwork(nn.Module):
         # --------output of second hidden layer
         x = self.fc3(x)
         x = self.non_linearity(x)
-        
+
         x = self.fc4(x)
         x = self.non_linearity(x)
 
@@ -69,6 +85,7 @@ if __name__ == "__main__":
     optimizer = optim.Adam(net.parameters(),lr = 0.5)
 
     df = pd.read_csv("data_shuffle.csv")
+    num_rows = df.shape[0]
 
     inp_columns = df.drop('Action',axis=1).columns # the dropped column is not in-place
     num_inp = len(inp_columns)

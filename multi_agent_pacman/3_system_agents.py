@@ -75,35 +75,6 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
         self.values = 0
         self.indicies = 0
     def getAction(self,gameState):
-        # columns = list()
-        # rows = list()
-        # rows = [gameState.getPacmanPosition()[0],gameState.getPacmanPosition()[1], \
-        # gameState.getGhostPositions()[0][0],gameState.getGhostPositions()[0][1], \
-        # gameState.getGhostPositions()[1][0],gameState.getGhostPositions()[1][1] , \
-        # gameState.getNumFood(), gameState.getScore()]
-
-        # if len(gameState.getCapsules()) == 2:
-        #     for i in range(len(gameState.getCapsules())):
-        #         rows.append(gameState.getCapsules()[i][0])
-        #         rows.append(gameState.getCapsules()[i][1])
-        # elif len(gameState.getCapsules()) == 1:
-        #     for i in range(len(gameState.getCapsules())):
-        #         rows.append(gameState.getCapsules()[i][0])
-        #         rows.append(gameState.getCapsules()[i][1])
-        #     rows.append(-1)
-        #     rows.append(-1)
-        # else:
-        #     for i in range(4):
-        #         rows.append(-1)
-
-        # for i in range(20):
-        #     for j in range(7):
-        #         gameState.getWalls()[i][j] = -1*gameState.getWalls()[i][j]
-        # for i in range(20):
-        #     for j in range(7):
-        #         rows.append(gameState.getFood()[i][j] + gameState.getWalls()[i][j])
-        #         columns.append("Grid" + str(i) + "_" + str(j))
-        # start filling data into the dataframe
         columns = list()
         rows = list()
 
