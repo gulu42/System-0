@@ -25,10 +25,6 @@ from game import Agent
 sys.path.insert(1,'../neural_network/pacman_nn')
 from train_pacman_nn import PacmanNetwork
 
-temp_net = PacmanNetwork()
-print(type(temp_net))
-print(temp_net)
-
 def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
@@ -72,12 +68,10 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
         self.network = PacmanNetwork()
         self.network.load_state_dict(torch.load('../neural_network/pacman_nn/net.pth'))
         self.s_max = nn.Softmax(dim=1)
-        self.values = 0
-        self.indicies = 0
     def getAction(self,gameState):
-        columns = list()
         rows = list()
 
+        # Extract game state to pass to networs ----- start
         # grid_values = gameState.getWalls().shallowCopy()
         grid_values = [[0 for i in range(7)] for j in range(20)]
 
@@ -92,7 +86,6 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
                 grid_values[i][j] = 2*gameState.getFood()[i][j] + gameState.getWalls()[i][j] + 1
         print(gameState.getWalls())
         legalMoves = gameState.getLegalActions()
-        print(legalMoves)
         # fill pacman position as 0
         x,y = gameState.getPacmanPosition()
         grid_values[x][y] = 0
@@ -111,18 +104,17 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
         for i in range(20):
             for j in range(7):
                 rows.append(grid_values[i][j])
-                columns.append("Grid" + str(i) + "_" + str(j))
+
+        # Extract game state to pass to networs ----- end
 
         # print(grid_values)
 
         inp = torch.FloatTensor(map(float, rows))
         out = self.network(inp)
         out = self.s_max(out.unsqueeze(dim=0)).squeeze(dim=0)
-        # self.values, self.indices = out.max(0)
-        print self.values
-        print self.indicies
+        print("network prob:",out)
         legalMoves = gameState.getLegalActions()
-        print(legalMoves)
+        print("legal moves:",legalMoves)
         max_move = 'Stop'
         max_prob = 0
         print out

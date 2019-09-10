@@ -38,7 +38,6 @@ class PacmanNetwork(nn.Module):
         self.fc4 = nn.Linear(50,20)
         self.fc5 = nn.Linear(20,4)
         self.dropout = nn.Dropout(p=0.3)
-        self.log_smax = nn.LogSoftmax(dim=1)
 
     def forward(self,x): #define the forward pass here
         x = self.fc1(x)
@@ -57,7 +56,6 @@ class PacmanNetwork(nn.Module):
         x = self.non_linearity(x)
 
         x = self.fc5(x)
-        x = self.log_smax(x.unsqueeze(dim=0))
         return x
 
 def get_class_given_action(action):
@@ -80,6 +78,7 @@ if __name__ == "__main__":
         net = PacmanNetwork()
 
     loss_criterion = nn.KLDivLoss()
+    log_smax = nn.LogSoftmax(dim=1) # KL-Divergence expects a log softmax of the neural network output
     optimizer = optim.Adam(net.parameters(),lr = 0.5)
 
     dataset = PacmanDataset("data.csv")
@@ -97,7 +96,7 @@ if __name__ == "__main__":
             net_out = net(inp) # network has a log softmax as the last layer
 
             # calculate loss
-            loss = loss_criterion(net_out,target)
+            loss = loss_criterion(log_smax(net_out.unsqueeze(dim=0)),target) #the log softmax needs a one layer of padding, the network output doesn't have this
 
             #update network
             optimizer.zero_grad()
