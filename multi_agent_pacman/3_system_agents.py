@@ -155,16 +155,16 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
         max_move = 'Stop'
         max_prob = 0
         print out
-        if 'North' in legalMoves and out[0] > max_prob:
+        if 'North' in legalMoves and out[0] >= max_prob:
             max_move = 'North'
             max_prob = out[0]
-        elif 'East' in legalMoves and out[1] > max_prob:
+        elif 'East' in legalMoves and out[1] >= max_prob:
             max_move = 'East'
             max_prob = out[1]
-        elif 'South' in legalMoves and out[2] > max_prob:
+        elif 'South' in legalMoves and out[2] >= max_prob:
             max_move = 'South'
             max_prob = out[2]
-        elif 'West' in legalMoves and out[3] > max_prob:
+        elif 'West' in legalMoves and out[3] >= max_prob:
             max_move = 'West'
             max_prob = out[3]
         else:

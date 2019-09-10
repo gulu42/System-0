@@ -5,8 +5,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-epochs = 5
-
+epochs = 2
+batch_size = 20
 
 class PacmanNetwork(nn.Module):
     def __init__(self): #all inits here
@@ -14,10 +14,11 @@ class PacmanNetwork(nn.Module):
         # self.non_linearity = nn.ReLU()
         self.non_linearity = nn.SELU()
         self.s_max = nn.Softmax(dim=1)
-        self.fc1 = nn.Linear(140,100)
-        self.fc2 = nn.Linear(100,60)
-        self.fc3 = nn.Linear(60,20)
-        self.fc4 = nn.Linear(20,4)
+        self.fc1 = nn.Linear(140,110)
+        self.fc2 = nn.Linear(110,80)
+        self.fc3 = nn.Linear(80,50)
+        self.fc4 = nn.Linear(50,20)
+        self.fc5 = nn.Linear(20,4)
 
 
     def forward(self,x): #define the forward pass here
@@ -31,6 +32,9 @@ class PacmanNetwork(nn.Module):
         x = self.non_linearity(x)
         
         x = self.fc4(x)
+        x = self.non_linearity(x)
+
+        x = self.fc5(x)
         # x = self.s_max(x.unsqueeze(dim=0))
         # cross entropy applies softmax on its own
         # Add this to the output of the network when using it later
@@ -50,7 +54,11 @@ def get_class_given_action(action):
         return 3
 
 if __name__ == "__main__":
-    net = PacmanNetwork()
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    if torch.cuda.is_available():
+        net = PacmanNetwork().cuda()
+    else:
+        net = PacmanNetwork()
     # net.load_state_dict(torch.load('./net.pth'))
     # print("Network:")
     # print(net)

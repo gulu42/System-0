@@ -16,6 +16,8 @@ from util import manhattanDistance
 from game import Directions
 import random, util
 import os
+from collections import OrderedDict 
+
 
 from game import Agent
 
@@ -268,13 +270,12 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             if utility > maximum or maximum == float("-inf"):
                 maximum = utility
                 action = agentState
-
-
+        
         # start filling data into the dataframe
         columns = list()
         rows = list()
 
-        grid_values = gameState.getWalls()
+        grid_values = [[0 for i in range(7)] for j in range(20)]
 
         # fill walls as -3, -4 for now, will add 1 to it for empty cells
         for i in range(20):
@@ -311,17 +312,40 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         rows.append(action)
 
         # print(grid_values)
+        direction = OrderedDict()
+        direction["North"] = 0
+        direction["East"] = 0
+        direction["South"] = 0
+        direction["West"] = 0
+        columns.append("North")
+        columns.append("East")
+        columns.append("South")
+        columns.append("West")
+        epsilon = 0.5
+        setOfLegalActions = gameState.getLegalActions(0)
+        setOfLegalActions.remove('Stop')
+        if(action is not 'Stop'):
+            if(len(setOfLegalActions) is not 1):
+                for i in setOfLegalActions:
+                    direction[i] = epsilon/(len(setOfLegalActions) - 1)
+                direction[action] = 1 - epsilon
+            else:
+                direction[action] = 1
 
-        df = pd.DataFrame(columns = columns)
-        if(os.stat("data.csv").st_size != 0):
-            df.loc[len(df)] = rows
-            df.to_csv ("data.csv", index = None,mode='a', header=False)
-
+            for key, value in direction.items():
+                rows.append(value)
+            df = pd.DataFrame(columns = columns)
+            if(os.stat("data.csv").st_size != 0):
+                df.loc[len(columns)] = rows
+                df.to_csv ("data.csv", index = None,mode='a', header=False)
+            else:
+                df.append(rows)
+                df.to_csv ("data.csv", index = None, header=True)
+            return action
         else:
-            df.append(rows)
-            df.to_csv ("data.csv", index = None, header=True)
-        return action
-
+            return action
+        # print(grid_values)
+       
 def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
