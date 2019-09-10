@@ -37,27 +37,27 @@ class PacmanNetwork(nn.Module):
         self.fc3 = nn.Linear(80,50)
         self.fc4 = nn.Linear(50,20)
         self.fc5 = nn.Linear(20,4)
-        self.final_layer = nn.LogSoftmax(dim=1)
+        self.dropout = nn.Dropout(p=0.3)
+        self.log_smax = nn.LogSoftmax(dim=1)
 
     def forward(self,x): #define the forward pass here
         x = self.fc1(x)
         x = self.non_linearity(x)
+        x = self.dropout(x)
         # --------output of first hidden layer
         x = self.fc2(x)
         x = self.non_linearity(x)
+        x = self.dropout(x)
         # --------output of second hidden layer
         x = self.fc3(x)
         x = self.non_linearity(x)
+        x = self.dropout(x)
 
         x = self.fc4(x)
         x = self.non_linearity(x)
 
         x = self.fc5(x)
-        # x = self.s_max(x.unsqueeze(dim=0))
-        # cross entropy applies softmax on its own
-        # Add this to the output of the network when using it later
-        # --------apply softmax and return moves probability
-        x = self.final_layer(x.unsqueeze(dim=0))
+        x = self.log_smax(x.unsqueeze(dim=0))
         return x
 
 def get_class_given_action(action):
@@ -79,16 +79,11 @@ if __name__ == "__main__":
     else:
         net = PacmanNetwork()
 
-    # move module to gpu before constructiong optimizer object
-    #check availability of GPU and then use cuda to shift model there
     loss_criterion = nn.KLDivLoss()
     optimizer = optim.Adam(net.parameters(),lr = 0.5)
 
-    dataset = PacmanDataset("data_shuffle.csv")
+    dataset = PacmanDataset("data.csv")
     trainloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle = True, num_workers=8)
-
-    # inp_columns = df.drop(['Action','North','East','South','West'],axis=1).columns # the dropped column is not in-place
-    # num_inp = len(inp _columns)
 
     for e in range(epochs):
         # for index,row in df.iterrows():
@@ -110,4 +105,4 @@ if __name__ == "__main__":
             optimizer.step()
         print("Loss - epoch",e,": ",loss)
 
-    torch.save(net.state_dict(), './mini_net.pth')
+    torch.save(net.state_dict(), './net.pth')
