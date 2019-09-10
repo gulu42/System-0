@@ -72,10 +72,7 @@ def get_class_given_action(action):
 
 if __name__ == "__main__":
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    if torch.cuda.is_available():
-        net = PacmanNetwork().cuda()
-    else:
-        net = PacmanNetwork()
+    net = PacmanNetwork().to(device)
 
     loss_criterion = nn.KLDivLoss()
     log_smax = nn.LogSoftmax(dim=1) # KL-Divergence expects a log softmax of the neural network output
@@ -89,8 +86,8 @@ if __name__ == "__main__":
         for i,data in enumerate(trainloader,0):
 
             # get input and target
-            inp = data[:,:-4] # for each row in th ebatch, pick everything except the last 4 columns (target values)
-            target = data[:,-4:]
+            inp = data[:,:-4].to(device) # for each row in th ebatch, pick everything except the last 4 columns (target values)
+            target = data[:,-4:].to(device)
 
             # Get network output
             net_out = net(inp) # network has a log softmax as the last layer
