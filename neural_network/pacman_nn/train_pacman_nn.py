@@ -4,6 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
 
 epochs = 5
 batch_size = 10
@@ -35,7 +36,7 @@ class PacmanNetwork(nn.Module):
         self.fc3 = nn.Linear(80,50)
         self.fc4 = nn.Linear(50,20)
         self.fc5 = nn.Linear(20,4)
-
+        self.final_layer = nn.LogSoftmax(dim=1)
 
     def forward(self,x): #define the forward pass here
         x = self.fc1(x)
@@ -55,6 +56,7 @@ class PacmanNetwork(nn.Module):
         # cross entropy applies softmax on its own
         # Add this to the output of the network when using it later
         # --------apply softmax and return moves probability
+        x = self.final_layer(x.unsqueeze(dim=0))
         return x
 
 def get_class_given_action(action):
@@ -81,27 +83,31 @@ if __name__ == "__main__":
 
     # move module to gpu before constructiong optimizer object
     #check availability of GPU and then use cuda to shift model there
-    loss_criterion = nn.CrossEntropyLoss()
+    loss_criterion = nn.KLDivLoss()
     optimizer = optim.Adam(net.parameters(),lr = 0.5)
 
     df = pd.read_csv("data_shuffle.csv")
     num_rows = df.shape[0]
 
-    inp_columns = df.drop('Action',axis=1).columns # the dropped column is not in-place
+    inp_columns = df.drop(['Action','North','East','South','West'],axis=1).columns # the dropped column is not in-place
     num_inp = len(inp_columns)
 
     # Storage for target value
-    target = torch.LongTensor(1)
+    target = torch.FloatTensor(4)
 
     for e in range(epochs):
         for index,row in df.iterrows():
 
             # get input and target
             inp = torch.FloatTensor(map(float, row[inp_columns]))
-            target[0] = get_class_given_action(row["Action"])
+            target[0] = float(row["North"])
+            target[1] = float(row["East"])
+            target[2] = float(row["South"])
+            target[3] = float(row["West"])
 
-            # Get network outputzzz
-            net_out = net(inp).unsqueeze(dim=0) # unsqueeze to apply cross entropy loss
+            # Get network output
+            # net_out = net(inp).unsqueeze(dim=0) # unsqueeze to apply cross entropy loss
+            net_out = net(inp) # network has a log softmax as the last layer
             # print(net_out)
 
             # calculate loss
@@ -113,4 +119,4 @@ if __name__ == "__main__":
             optimizer.step()
         print("Loss - pass",index,": ",loss)
 
-    torch.save(net.state_dict(), './net.pth')
+    torch.save(net.state_dict(), './mini_net.pth')
