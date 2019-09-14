@@ -67,6 +67,8 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
     def __init__(self):
         self.network = PacmanNetwork()
         self.network.load_state_dict(torch.load('../neural_network/pacman_nn/net.pth'))
+        # self.network.load_state_dict(torch.load('./net.pth'))
+        # self.network.load_state_dict(torch.load('./net_epoch_3.pth',map_location=torch.device('cpu')))
         self.s_max = nn.Softmax(dim=1)
     def getAction(self,gameState):
         rows = list()
@@ -111,6 +113,7 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
 
         inp = torch.FloatTensor(map(float, rows))
         out = self.network(inp)
+        print("network out:",out)
         out = self.s_max(out.unsqueeze(dim=0)).squeeze(dim=0)
         print("network prob:",out)
         legalMoves = gameState.getLegalActions()

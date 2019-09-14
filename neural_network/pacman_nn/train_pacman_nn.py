@@ -78,13 +78,14 @@ if __name__ == "__main__":
     log_smax = nn.LogSoftmax(dim=1) # KL-Divergence expects a log softmax of the neural network output
     optimizer = optim.Adam(net.parameters(),lr = 0.5)
 
-    dataset = PacmanDataset("data.csv")
+    dataset = PacmanDataset("mini_data.csv")
     trainloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle = True, num_workers=8)
 
     for e in range(epochs):
         # for index,row in df.iterrows():
         for i,data in enumerate(trainloader,0):
 
+            print("epoch:",e," ; Index:",i)
             # get input and target
             inp = data[:,:-4].to(device) # for each row in th ebatch, pick everything except the last 4 columns (target values)
             target = data[:,-4:].to(device)
@@ -100,5 +101,5 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
         print("Loss - epoch",e,": ",loss)
-
+        # torch.save(net.state_dict(), './net_epoch_' + str(e) + '.pth')
     torch.save(net.state_dict(), './net.pth')
