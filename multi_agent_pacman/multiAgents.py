@@ -300,7 +300,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         for i in range(len(gameState.getCapsules())):
             x,y = gameState.getCapsules()[i]
             grid_values[x][y] = +10
-
         # fill rows and columns to add to dataset
         for i in range(20):
             for j in range(7):
