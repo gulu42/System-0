@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -17,6 +17,7 @@ from learningAgents import ReinforcementAgent
 from featureExtractors import *
 
 import random,util,math
+import pickle
 
 class QLearningAgent(ReinforcementAgent):
     """
@@ -181,6 +182,14 @@ class ApproximateQAgent(PacmanQAgent):
         PacmanQAgent.__init__(self, **args)
         self.weights = util.Counter()
 
+    # Adding these functions since now can be sure it won't affect anything else
+    # However, now will have to remember to do this when not training
+    def setWeights(self, new_weights):
+        self.weights = new_weights
+
+    def setExtractor(self, new_extractor):
+        self.featExtractor =  new_extractor
+
     def getWeights(self):
         return self.weights
 
@@ -216,4 +225,8 @@ class ApproximateQAgent(PacmanQAgent):
         if self.episodesSoFar == self.numTraining:
             # you might want to print your weights here for debugging
             "*** YOUR CODE HERE ***"
-            pass
+            # store everything in the same directory
+            with open('network_weights.pkl', 'wb') as output:
+                pickle.dump(self.weights, output, pickle.HIGHEST_PROTOCOL)
+            with open('features.pkl', 'wb') as output:
+                pickle.dump(self.featExtractor, output, pickle.HIGHEST_PROTOCOL)
