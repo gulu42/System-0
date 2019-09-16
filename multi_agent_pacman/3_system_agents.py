@@ -19,8 +19,10 @@ import random, util
 import torch
 import torch.nn as nn
 import copy
+import pickle
 
 from game import Agent
+from qlearningAgents import ApproximateQAgent
 
 sys.path.insert(1,'../neural_network/pacman_nn')
 from train_pacman_nn import PacmanNetwork
@@ -65,78 +67,17 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
     """
 
     def __init__(self):
-        self.network = PacmanNetwork()
-        self.network.load_state_dict(torch.load('../neural_network/pacman_nn/net.pth'))
-        # self.network.load_state_dict(torch.load('./net.pth'))
-        # self.network.load_state_dict(torch.load('./net_epoch_3.pth',map_location=torch.device('cpu')))
-        self.s_max = nn.Softmax(dim=1)
+        self.q_learning_agent = ApproximateQAgent(extractor = 'SimpleExtractor') #need to figure out how to pass args here
+        with open('weights/network_weights.pkl', 'rb') as input:
+            trained_weights = pickle.load(input)
+            self.q_learning_agent.setWeights(trained_weights)
+            print("Loaded trained weights")
+        with open('weights/features.pkl', 'rb') as input:
+            extractor_used = pickle.load(input)
+            self.q_learning_agent.setExtractor(extractor_used)
+            print("Loaded extractor")
     def getAction(self,gameState):
-        rows = list()
-
-        # Extract game state to pass to networs ----- start
-        # grid_values = gameState.getWalls().shallowCopy()
-        grid_values = [[0 for i in range(7)] for j in range(20)]
-
-        # fill walls as -3, -4 for now, will add 1 to it for empty cells
-        for i in range(20):
-            for j in range(7):
-                grid_values[i][j] = -4*gameState.getWalls()[i][j]
-
-        # fill food cells as +3, empty cells as +1
-        for i in range(20):
-            for j in range(7):
-                grid_values[i][j] = 2*gameState.getFood()[i][j] + gameState.getWalls()[i][j] + 1
-        print(gameState.getWalls())
-        legalMoves = gameState.getLegalActions()
-        # fill pacman position as 0
-        x,y = gameState.getPacmanPosition()
-        grid_values[x][y] = 0
-
-        # fill ghost position as -10
-        for i in range(2):
-            x,y = map(int,gameState.getGhostPositions()[i])
-            grid_values[x][y] = -10
-
-        # fill capsule positions as +10
-        for i in range(len(gameState.getCapsules())):
-            x,y = gameState.getCapsules()[i]
-            grid_values[x][y] = +10
-
-        # fill rows and columns to add to dataset
-        for i in range(20):
-            for j in range(7):
-                rows.append(grid_values[i][j])
-
-        # Extract game state to pass to networs ----- end
-
-        # print(grid_values)
-
-        inp = torch.FloatTensor(map(float, rows))
-        out = self.network(inp)
-        print("network out:",out)
-        out = self.s_max(out.unsqueeze(dim=0)).squeeze(dim=0)
-        print("network prob:",out)
-        legalMoves = gameState.getLegalActions()
-        print("legal moves:",legalMoves)
-        max_move = 'Stop'
-        max_prob = 0
-        print out
-        if 'North' in legalMoves and out[0] >= max_prob:
-            max_move = 'North'
-            max_prob = out[0]
-        elif 'East' in legalMoves and out[1] >= max_prob:
-            max_move = 'East'
-            max_prob = out[1]
-        elif 'South' in legalMoves and out[2] >= max_prob:
-            max_move = 'South'
-            max_prob = out[2]
-        elif 'West' in legalMoves and out[3] >= max_prob:
-            max_move = 'West'
-            max_prob = out[3]
-        else:
-            return "Stop"
-        return max_move
-
+        return self.q_learning_agent.getAction(gameState)
 
 class System2Agent(Agent): #system 2 is capable of gameplay on its own
     """
