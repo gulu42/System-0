@@ -18,6 +18,7 @@ from featureExtractors import *
 
 import random,util,math
 import pickle
+import sys
 
 class QLearningAgent(ReinforcementAgent):
     """
@@ -128,7 +129,8 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         "*** YOUR CODE HERE ***"
-        self.values[(state, action)] = ((1 - self.alpha) * self.getQValue(state, action)) + (self.alpha * (reward + self.discount * self.computeValueFromQValues(nextState)))
+        if self.episodesSoFar != self.numTraining:
+            self.values[(state, action)] = ((1 - self.alpha) * self.getQValue(state, action)) + (self.alpha * (reward + self.discount * self.computeValueFromQValues(nextState)))
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
@@ -181,6 +183,7 @@ class ApproximateQAgent(PacmanQAgent):
         self.featExtractor = util.lookup(extractor, globals())()
         PacmanQAgent.__init__(self, **args)
         self.weights = util.Counter()
+        # print("Initial weights:",self.weights)
 
     # Adding these functions since now can be sure it won't affect anything else
     # However, now will have to remember to do this when not training
@@ -203,6 +206,8 @@ class ApproximateQAgent(PacmanQAgent):
         qvalue = 0
         for feature in features:
             qvalue += features[feature] * self.weights[feature]
+            # print(feature, features[feature],self.weights[feature])
+        # sys.exit(0)
 
         return qvalue
 
@@ -211,10 +216,19 @@ class ApproximateQAgent(PacmanQAgent):
            Should update your weights based on transition
         """
         "*** YOUR CODE HERE ***"
-        difference = (reward + (self.discount * self.getValue(nextState))) - self.getQValue(state, action)
-        features = self.featExtractor.getFeatures(state, action)
-        for feature in features:
-            self.weights[feature] = self.weights[feature] + (self.alpha * features[feature] * difference)
+        print ("-----------------------------")
+        print ("episodesSoFar :"  + str(self.episodesSoFar))
+        print ("numTraining :" + str(self.numTraining))
+        print ("-----------------------------")
+        if(self.episodesSoFar < self.numTraining):
+            # print ("-----------------------------")
+            # print ("episodesSoFar :"  + str(self.episodesSoFar))
+            # print ("numTraining :" + str(self.numTraining))
+            # print ("-----------------------------")
+            difference = (reward + (self.discount * self.getValue(nextState))) - self.getQValue(state, action)
+            features = self.featExtractor.getFeatures(state, action)
+            for feature in features:
+                self.weights[feature] = self.weights[feature] + (self.alpha * features[feature] * difference)
 
     def final(self, state):
         "Called at the end of each game."

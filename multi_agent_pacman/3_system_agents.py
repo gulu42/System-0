@@ -67,12 +67,12 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
     """
 
     def __init__(self):
-        self.q_learning_agent = ApproximateQAgent(extractor = 'SimpleExtractor') #need to figure out how to pass args here
-        with open('weights/network_weights.pkl', 'rb') as input:
+        self.q_learning_agent = ApproximateQAgent(extractor = 'SimpleExtractor',numTraining=-1) #need to figure out how to pass args here
+        with open('network_weights.pkl', 'rb') as input:
             trained_weights = pickle.load(input)
             self.q_learning_agent.setWeights(trained_weights)
             print("Loaded trained weights")
-        with open('weights/features.pkl', 'rb') as input:
+        with open('features.pkl', 'rb') as input:
             extractor_used = pickle.load(input)
             self.q_learning_agent.setExtractor(extractor_used)
             print("Loaded extractor")
