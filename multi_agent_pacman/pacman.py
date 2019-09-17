@@ -47,7 +47,7 @@ from util import nearestPoint
 from util import manhattanDistance
 import util, layout
 import sys, types, time, random, os
-
+import pandas as pd
 ###################################################
 # YOUR INTERFACE TO THE PACMAN WORLD: A GameState #
 ###################################################
@@ -627,12 +627,13 @@ def replayGame( layout, actions, display ):
 
 def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0, catchExceptions=False, timeout=30 ):
     import __main__
+    import time
     __main__.__dict__['_display'] = display
 
     rules = ClassicGameRules(timeout)
     games = []
-
     for i in range( numGames ):
+        start_time = time.time()
         beQuiet = i < numTraining
         if beQuiet:
                 # Suppress output and graphics
@@ -644,6 +645,18 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
             rules.quiet = False
         game = rules.newGame( layout, pacman, ghosts, gameDisplay, beQuiet, catchExceptions)
         game.run()
+        elapsed_time = time.time() - start_time
+        columns = ["time","score","result"]
+        score = game.state.getScore()
+        win = game.state.isWin()
+        rows = [elapsed_time,score,win] 
+        df = pd.DataFrame(columns = columns)
+        if(os.stat("data.csv").st_size != 0):
+            df.loc[len(columns)] = rows
+            df.to_csv ("data.csv", index = None,mode='a', header=False)
+        else:
+            df.append(rows)
+            df.to_csv ("data.csv", index = None, header=True)
         if not beQuiet: games.append(game)
 
         if record:
