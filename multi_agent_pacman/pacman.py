@@ -651,12 +651,12 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
         win = game.state.isWin()
         rows = [elapsed_time,score,win] 
         df = pd.DataFrame(columns = columns)
-        if(os.stat("data.csv").st_size != 0):
+        if(os.stat("data2.csv").st_size != 0):
             df.loc[len(columns)] = rows
-            df.to_csv ("data.csv", index = None,mode='a', header=False)
+            df.to_csv ("data2.csv", index = None,mode='a', header=False)
         else:
             df.append(rows)
-            df.to_csv ("data.csv", index = None, header=True)
+            df.to_csv ("data2.csv", index = None, header=True)
         if not beQuiet: games.append(game)
 
         if record:
