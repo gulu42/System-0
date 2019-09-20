@@ -649,14 +649,15 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
         columns = ["time","score","result"]
         score = game.state.getScore()
         win = game.state.isWin()
-        rows = [elapsed_time,score,win] 
+        rows = [elapsed_time,score,win]
         df = pd.DataFrame(columns = columns)
-        if(os.stat("data2.csv").st_size != 0):
+        file_name = "data_rand.csv"
+        if(os.stat(file_name).st_size != 0):
             df.loc[len(columns)] = rows
-            df.to_csv ("data2.csv", index = None,mode='a', header=False)
+            df.to_csv (file_name, index = None,mode='a', header=False)
         else:
             df.append(rows)
-            df.to_csv ("data2.csv", index = None, header=True)
+            df.to_csv (file_name, index = None, header=True)
         if not beQuiet: games.append(game)
 
         if record:
