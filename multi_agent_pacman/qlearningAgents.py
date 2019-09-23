@@ -227,10 +227,10 @@ class ApproximateQAgent(PacmanQAgent):
         # print ("numTraining :" + str(self.numTraining))
         # print ("-----------------------------")
         if(self.episodesSoFar < self.numTraining):
-            # print ("-----------------------------")
-            # print ("episodesSoFar :"  + str(self.episodesSoFar))
-            # print ("numTraining :" + str(self.numTraining))
-            # print ("-----------------------------")
+            print ("-----------------------------")
+            print ("episodesSoFar :"  + str(self.episodesSoFar))
+            print ("numTraining :" + str(self.numTraining))
+            print ("-----------------------------")
             difference = (reward + (self.discount * self.getValue(nextState))) - self.getQValue(state, action)
             features = self.featExtractor.getFeatures(state, action)
             for feature in features:

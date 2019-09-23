@@ -85,7 +85,7 @@ class System2Agent(Agent): #system 2 is capable of gameplay on its own
     Code modelling actions of system 2 comes here
     """
 
-    def __init__(self, evalFn = 'betterEvaluationFunction', depth = '1'):
+    def __init__(self, evalFn = 'betterEvaluationFunction', depth = '2'):
         self.index = 0 # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
@@ -129,4 +129,5 @@ class System0Agent(Agent):
         self.system_2_model = System2Agent()
 
     def getAction(self,gameState):
+        # return self.system_1_model.getAction(gameState)
         return random.choice([self.system_1_model.getAction(gameState),self.system_2_model.getAction(gameState)])

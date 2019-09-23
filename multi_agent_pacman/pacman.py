@@ -651,7 +651,7 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
         win = game.state.isWin()
         rows = [elapsed_time,score,win]
         df = pd.DataFrame(columns = columns)
-        file_name = "data_rand.csv"
+        file_name = "data_sys0.csv"
         if(os.stat(file_name).st_size != 0):
             df.loc[len(columns)] = rows
             df.to_csv (file_name, index = None,mode='a', header=False)
