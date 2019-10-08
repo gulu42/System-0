@@ -127,7 +127,25 @@ class System0Agent(Agent):
     def __init__(self,sys1 = Agent(),sys2 = Agent()):
         self.system_1_model = System1Agent()
         self.system_2_model = System2Agent()
-
+        self.count = 0
     def getAction(self,gameState):
         # return self.system_1_model.getAction(gameState)
-        return random.choice([self.system_1_model.getAction(gameState),self.system_2_model.getAction(gameState)])
+        newPos = gameState.getPacmanPosition()
+        distances_to_ghosts = 1
+        proximity_to_ghosts = 0
+        for ghost_state in gameState.getGhostPositions():
+            distance = util.manhattanDistance(newPos, ghost_state)
+            distances_to_ghosts += distance
+            if distance <= 2:
+                proximity_to_ghosts += 1
+        if proximity_to_ghosts < 1:
+            move = self.system_1_model.getAction(gameState)
+        else:
+            move = self.system_2_model.getAction(gameState)
+        # self.count = self.count + 1
+        # if(self.system_1_model.getAction(gameState) != self.system_2_model.getAction(gameState)):
+        #     print "Made a choice"
+        # print "SYSTEM1:" + self.system_1_model.getAction(gameState)
+        # print "SYSTEM2:" + self.system_2_model.getAction(gameState)
+        # print "Count:" + str(self.count)
+        return move
