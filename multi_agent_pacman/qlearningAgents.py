@@ -184,20 +184,14 @@ class ApproximateQAgent(PacmanQAgent):
         PacmanQAgent.__init__(self, **args)
         self.featExtractor = util.lookup(extractor, globals())()
         self.weights = util.Counter()
-        print("Inside my init")
-        # print("Initial weights:",self.weights)
 
     # Adding these functions since now can be sure it won't affect anything else
     # However, now will have to remember to do this when not training
     def setWeights(self, new_weights):
         self.weights = new_weights
-        print("Weights set")
-        print(self.weights)
 
     def setExtractor(self, new_extractor):
         self.featExtractor =  new_extractor
-        print("Feature extractor set")
-        print(self.featExtractor)
 
     def getWeights(self):
         return self.weights
@@ -212,8 +206,6 @@ class ApproximateQAgent(PacmanQAgent):
         qvalue = 0
         for feature in features:
             qvalue += features[feature] * self.weights[feature]
-            # print(feature, features[feature],self.weights[feature])
-        # sys.exit(0)
 
         return qvalue
 
@@ -222,10 +214,6 @@ class ApproximateQAgent(PacmanQAgent):
            Should update your weights based on transition
         """
         "*** YOUR CODE HERE ***"
-        # print ("-----------------------------")
-        # print ("episodesSoFar :"  + str(self.episodesSoFar))
-        # print ("numTraining :" + str(self.numTraining))
-        # print ("-----------------------------")
         if(self.episodesSoFar < self.numTraining):
             print ("-----------------------------")
             print ("episodesSoFar :"  + str(self.episodesSoFar))
@@ -246,8 +234,6 @@ class ApproximateQAgent(PacmanQAgent):
             # you might want to print your weights here for debugging
             "*** YOUR CODE HERE ***"
             # store everything in the same directory
-            print("Writing to pickle")
-            print("Weights:",self.weights)
             with open('network_weights.pkl', 'wb') as output:
                 pickle.dump(self.weights, output, pickle.HIGHEST_PROTOCOL)
             with open('features.pkl', 'wb') as output:

@@ -20,6 +20,7 @@ import torch
 import torch.nn as nn
 import copy
 import pickle
+import numpy as np
 
 from game import Agent
 from qlearningAgents import ApproximateQAgent
@@ -72,11 +73,9 @@ class System1Agent(Agent): #system 1 is capable of gameplay on its own
         with open('network_weights.pkl', 'rb') as input:
             trained_weights = pickle.load(input)
             self.q_learning_agent.setWeights(trained_weights)
-            print("Loaded trained weights")
         with open('features.pkl', 'rb') as input:
             extractor_used = pickle.load(input)
             self.q_learning_agent.setExtractor(extractor_used)
-            print("Loaded extractor")
     def getAction(self,gameState):
         return self.q_learning_agent.getAction(gameState)
 
@@ -149,3 +148,18 @@ class System0Agent(Agent):
         # print "SYSTEM2:" + self.system_2_model.getAction(gameState)
         # print "Count:" + str(self.count)
         return move
+
+class RandomChoiceAgent(System0Agent):
+    def __init__(self, prob_sys1):
+        System0Agent.__init__(self)
+        self.prob_sys1 = float(prob_sys1)
+        # self.d = {1:0,2:0}
+
+    def getAction(self,gameState):
+        system_to_use = np.random.choice([1,2], p=[self.prob_sys1,1 - self.prob_sys1])
+        # self.d[system_to_use] += 1
+        # print self.d
+        if system_to_use == 1:
+            return self.system_1_model.getAction(gameState)
+        else:
+            return self.system_2_model.getAction(gameState)

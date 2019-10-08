@@ -459,6 +459,8 @@ class GhostRules:
 # FRAMEWORK TO START A GAME #
 #############################
 
+data_file_name = ""
+
 def default(str):
     return str + ' [Default: %default]'
 
@@ -524,6 +526,8 @@ def readCommand( argv ):
                       help='Turns on exception handling and timeouts during games', default=False)
     parser.add_option('--timeout', dest='timeout', type='int',
                       help=default('Maximum length of time an agent can spend computing in a single game'), default=30)
+    parser.add_option('--fname', type='str',dest ='fname',
+                      help='The name of the file(with extension) where the final game information is added')
 
     options, otherjunk = parser.parse_args(argv)
     if len(otherjunk) != 0:
@@ -532,6 +536,12 @@ def readCommand( argv ):
 
     # Fix the random seed
     if options.fixRandomSeed: random.seed('cs188')
+
+    # File where final info is added on completion
+    global data_file_name
+    data_file_name = options.fname
+    if options.fname is None:
+        print "Not storing final result, file not given"
 
     # Choose a layout
     args['layout'] = layout.getLayout( options.layout )
@@ -652,13 +662,17 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
         win = game.state.isWin()
         rows = [elapsed_time,score,win]
         df = pd.DataFrame(columns = columns)
-        file_name = "data_sys0.csv"
-        if(os.stat(file_name).st_size != 0):
-            df.loc[len(columns)] = rows
-            df.to_csv (file_name, index = None,mode='a', header=False)
-        else:
-            df.append(rows)
-            df.to_csv (file_name, index = None, header=True)
+
+        global data_file_name
+        if data_file_name is not None:
+            data_file_name = data_file_name
+            if(os.stat(data_file_name).st_size != 0):
+                df.loc[len(columns)] = rows
+                df.to_csv (data_file_name, index = None,mode='a', header=False)
+            else:
+                df.append(rows)
+                df.to_csv (data_file_name, index = None, header=True)
+
         if not beQuiet: games.append(game)
 
         if record:
