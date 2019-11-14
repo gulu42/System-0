@@ -293,7 +293,18 @@ class ClassicGameRules:
         game.gameOver = True
 
     def lose( self, state, game ):
-        if not self.quiet: 
+        if not self.quiet:
+            x,y = state.getPacmanPosition() 
+            columns = ["x" , "y"]
+            rows = [x,y]
+            df = pd.DataFrame(columns = columns)
+
+            # if(os.stat("heat_map_sys0().csv").st_size != 0):
+            #     df.loc[len(columns)] = rows
+            #     df.to_csv ("heat_map_sys0().csv", index = None,mode='a', header=False)
+            # else:
+            #     df.append(rows)
+            #     df.to_csv ("heat_map_sys0().csv", index = None, header=True)
             print "Pacman died! Score: %d" % state.data.score
         game.gameOver = True
 
