@@ -2,7 +2,7 @@
 
 probs=(0.1 0.3 0.5 0.7 0.9)
 
-n_games=100
+n_games=300
 
 rm data/*
 
