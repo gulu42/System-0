@@ -783,7 +783,7 @@ if __name__ == '__main__':
     # for i in range(args['numGames']):
     #     all_in.append((i, [i[1] for i in args.items()]))
     # print range(args['numGames'])
-    pool = Pool(processes=10)
+    pool = Pool(processes=14)
     result = pool.map(par, range(args['numGames']))
     print result[:2]
     print len(result)
