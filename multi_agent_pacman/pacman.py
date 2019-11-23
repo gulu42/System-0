@@ -45,9 +45,13 @@ from game import Directions
 from game import Actions
 from util import nearestPoint
 from util import manhattanDistance
+from multiprocessing import Pool
+from collections import OrderedDict
 import util, layout
 import sys, types, time, random, os
 import pandas as pd
+import  cPickle
+
 ###################################################
 # YOUR INTERFACE TO THE PACMAN WORLD: A GameState #
 ###################################################
@@ -543,7 +547,7 @@ def readCommand( argv ):
     options, otherjunk = parser.parse_args(argv)
     if len(otherjunk) != 0:
         raise Exception('Command line input not understood: ' + str(otherjunk))
-    args = dict()
+    args = OrderedDict()
 
     # Fix the random seed
     if options.fixRandomSeed: random.seed('cs188')
@@ -592,6 +596,7 @@ def readCommand( argv ):
     args['record'] = options.record
     args['catchExceptions'] = options.catchExceptions
     args['timeout'] = options.timeout
+    args['numTraining'] = 0
 
     # Special case: recorded games don't use the runGames method or args structure
     if options.gameToReplay != None:
@@ -646,6 +651,45 @@ def replayGame( layout, actions, display ):
         rules.process(state, game)
 
     display.finish()
+def par(i):
+    layout, pacman, ghosts, display, numGames, record, catchExceptions, timeout, numTraining = [i[1] for i in args.items()]
+    rules = ClassicGameRules(timeout)
+    start_time = time.time()
+    beQuiet = i < numTraining
+    if beQuiet:
+        import textDisplay
+        gameDisplay = textDisplay.NullGraphics()
+        rules.quiet = True
+    else:
+        gameDisplay = display
+        rules.quiet = False
+    game = rules.newGame( layout, pacman, ghosts, gameDisplay, beQuiet, catchExceptions)
+    game.run()
+    elapsed_time = time.time() - start_time
+    columns = ["time","score","result"]
+    score = game.state.getScore()
+    win = game.state.isWin()
+    rows = [elapsed_time,score,win]
+    df = pd.DataFrame(columns = columns)
+
+    global data_file_name
+    if data_file_name is not None:
+        data_file_name = data_file_name
+        if(os.stat(data_file_name).st_size != 0):
+            df.loc[len(columns)] = rows
+            df.to_csv (data_file_name, index = None,mode='a', header=False)
+        else:
+            df.append(rows)
+            df.to_csv (data_file_name, index = None, header=True)
+
+    # if not beQuiet: games.append(game)
+
+    if record:
+        fname = ('recorded-game-%d' % (i + 1)) +  '-'.join([str(t) for t in time.localtime()[1:6]])
+        f = file(fname, 'w')
+        components = {'layout': layout, 'actions': game.moveHistory}
+        cPickle.dump(components, f)
+        f.close()
 
 def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0, catchExceptions=False, timeout=30 ):
     import __main__
@@ -654,46 +698,7 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
 
     rules = ClassicGameRules(timeout)
     games = []
-    for i in range( numGames ):
-        start_time = time.time()
-        beQuiet = i < numTraining
-        if beQuiet:
-                # Suppress output and graphics
-            import textDisplay
-            gameDisplay = textDisplay.NullGraphics()
-            rules.quiet = True
-        else:
-            gameDisplay = display
-            rules.quiet = False
-        game = rules.newGame( layout, pacman, ghosts, gameDisplay, beQuiet, catchExceptions)
-        game.run()
-        elapsed_time = time.time() - start_time
-        columns = ["time","score","result"]
-        score = game.state.getScore()
-        win = game.state.isWin()
-        rows = [elapsed_time,score,win]
-        df = pd.DataFrame(columns = columns)
-
-        global data_file_name
-        if data_file_name is not None:
-            data_file_name = data_file_name
-            if(os.stat(data_file_name).st_size != 0):
-                df.loc[len(columns)] = rows
-                df.to_csv (data_file_name, index = None,mode='a', header=False)
-            else:
-                df.append(rows)
-                df.to_csv (data_file_name, index = None, header=True)
-
-        if not beQuiet: games.append(game)
-
-        if record:
-            import time, cPickle
-            fname = ('recorded-game-%d' % (i + 1)) +  '-'.join([str(t) for t in time.localtime()[1:6]])
-            f = file(fname, 'w')
-            components = {'layout': layout, 'actions': game.moveHistory}
-            cPickle.dump(components, f)
-            f.close()
-
+    par( layout, pacman, ghosts, display, numGames, record, numTraining = 0, catchExceptions=False, timeout=30)
     if (numGames-numTraining) > 0:
         scores = [game.state.getScore() for game in games]
         wins = [game.state.isWin() for game in games]
@@ -705,6 +710,9 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
         print 'Record:       ', ', '.join([ ['Loss', 'Win'][int(w)] for w in wins])
 
     return games
+
+def multi_run_wrapper(args):
+   return par(*args)
 
 if __name__ == '__main__':
     """
@@ -718,7 +726,18 @@ if __name__ == '__main__':
     > python pacman.py --help
     """
     args = readCommand( sys.argv[1:] ) # Get game components based on input
-    runGames( **args )
+    # runGames( **args )
+
+    # print args.keys()
+    all_in = []
+    # print [i[1] for i in args.items()]
+    # for i in range(args['numGames']):
+    #     all_in.append((i, [i[1] for i in args.items()]))
+    print range(args['numGames'])
+    pool = Pool(processes=10)
+    result = pool.map(par, range(args['numGames']))
+    print result[:2]
+    print len(result)
 
     # import cProfile
     # cProfile.run("runGames( **args )")
