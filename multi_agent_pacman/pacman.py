@@ -298,7 +298,7 @@ class ClassicGameRules:
 
     def lose( self, state, game ):
         if not self.quiet:
-            x,y = state.getPacmanPosition() 
+            x,y = state.getPacmanPosition()
             columns = ["x" , "y"]
             rows = [x,y]
             df = pd.DataFrame(columns = columns)
@@ -651,8 +651,10 @@ def replayGame( layout, actions, display ):
         rules.process(state, game)
 
     display.finish()
+
 def par(i):
     layout, pacman, ghosts, display, numGames, record, catchExceptions, timeout, numTraining = [i[1] for i in args.items()]
+
     rules = ClassicGameRules(timeout)
     start_time = time.time()
     beQuiet = i < numTraining
@@ -698,16 +700,63 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
 
     rules = ClassicGameRules(timeout)
     games = []
-    par( layout, pacman, ghosts, display, numGames, record, numTraining = 0, catchExceptions=False, timeout=30)
+    # par( layout, pacman, ghosts, display, numGames, record, numTraining = 0, catchExceptions=False, timeout=30)
+    for i in range( numGames ):
+        beQuiet = i < numTraining
+        if beQuiet:
+                # Suppress output and graphics
+            import textDisplay
+            gameDisplay = textDisplay.NullGraphics()
+            rules.quiet = True
+        else:
+            gameDisplay = display
+            rules.quiet = False
+        game = rules.newGame( layout, pacman, ghosts, gameDisplay, beQuiet, catchExceptions)
+
+        start_time = time.time()
+        game.run()
+        elapsed_time = time.time() - start_time
+
+        columns = ["time","score","result"]
+
+        print_interval=100
+        if i%print_interval == 0:
+            print pacman,": Finished",i,"games"
+
+        score = game.state.getScore()
+        win = game.state.isWin()
+        rows = [elapsed_time,score,win]
+        df = pd.DataFrame(columns = columns)
+
+        global data_file_name
+        if data_file_name is not None:
+            data_file_name = data_file_name
+            if(os.stat(data_file_name).st_size != 0):
+                df.loc[len(columns)] = rows
+                df.to_csv (data_file_name, index = None,mode='a', header=False)
+            else:
+                df.append(rows)
+                df.to_csv (data_file_name, index = None, header=True)
+
+        if not beQuiet: games.append(game)
+
+        if record:
+            import time, cPickle
+            fname = ('recorded-game-%d' % (i + 1)) +  '-'.join([str(t) for t in time.localtime()[1:6]])
+            f = file(fname, 'w')
+            components = {'layout': layout, 'actions': game.moveHistory}
+            cPickle.dump(components, f)
+            f.close()
+
     if (numGames-numTraining) > 0:
         scores = [game.state.getScore() for game in games]
         wins = [game.state.isWin() for game in games]
         winRate = wins.count(True)/ float(len(wins))
-        print("Final win state: ",wins)
-        print 'Average Score:', sum(scores) / float(len(scores))
-        print 'Scores:       ', ', '.join([str(score) for score in scores])
-        print 'Win Rate:      %d/%d (%.2f)' % (wins.count(True), len(wins), winRate)
-        print 'Record:       ', ', '.join([ ['Loss', 'Win'][int(w)] for w in wins])
+        # print("Final win state: ",wins)
+        # print 'Average Score:', sum(scores) / float(len(scores))
+        # print 'Scores:       ', ', '.join([str(score) for score in scores])
+        # print 'Win Rate:      %d/%d (%.2f)' % (wins.count(True), len(wins), winRate)
+        # print 'Record:       ', ', '.join([ ['Loss', 'Win'][int(w)] for w in wins])
 
     return games
 
@@ -733,7 +782,7 @@ if __name__ == '__main__':
     # print [i[1] for i in args.items()]
     # for i in range(args['numGames']):
     #     all_in.append((i, [i[1] for i in args.items()]))
-    print range(args['numGames'])
+    # print range(args['numGames'])
     pool = Pool(processes=10)
     result = pool.map(par, range(args['numGames']))
     print result[:2]

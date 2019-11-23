@@ -16,8 +16,6 @@ import sys
 from util import manhattanDistance
 from game import Directions
 import random, util
-import torch
-import torch.nn as nn
 import copy
 import pickle
 import numpy as np
@@ -25,8 +23,6 @@ import numpy as np
 from game import Agent
 from qlearningAgents import ApproximateQAgent
 
-sys.path.insert(1,'../neural_network/pacman_nn')
-from train_pacman_nn import PacmanNetwork
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -180,6 +176,31 @@ class System0Agent(Agent):
             move = self.system_1_model.getAction(gameState)
         return move
 
+class ProximityAgent(System0Agent):
+    def __init__(self):
+        System0Agent.__init__(self)
+    def getAction(self,gameState):
+        # return self.system_1_model.getAction(gameState)
+        newPos = gameState.getPacmanPosition()
+        distances_to_ghosts = 1
+        proximity_to_ghosts = 0
+        for ghost_state in gameState.getGhostPositions():
+            distance = util.manhattanDistance(newPos, ghost_state)
+            distances_to_ghosts += distance
+            if distance <= 2:
+                proximity_to_ghosts += 1
+        if proximity_to_ghosts < 1:
+            move = self.system_1_model.getAction(gameState)
+        else:
+            move = self.system_2_model.getAction(gameState)
+        # self.count = self.count + 1
+        # if(self.system_1_model.getAction(gameState) != self.system_2_model.getAction(gameState)):
+        #     print "Made a choice"
+        # print "SYSTEM1:" + self.system_1_model.getAction(gameState)
+        # print "SYSTEM2:" + self.system_2_model.getAction(gameState)
+        # print "Count:" + str(self.count)
+        return move
+
 class RandomChoiceAgent(System0Agent):
     def __init__(self, prob_sys1):
         System0Agent.__init__(self)
@@ -194,3 +215,29 @@ class RandomChoiceAgent(System0Agent):
             return self.system_1_model.getAction(gameState)
         else:
             return self.system_2_model.getAction(gameState)
+
+class ProximityAndFoodAgent(System0Agent):
+    def __init__(self,food_thresh=0.5):
+        System0Agent.__init__(self)
+        self.threshold = food_thresh
+        self.total_food_num = 65.0
+
+    def getAction(self,gameState):
+        newPos = gameState.getPacmanPosition()
+        distances_to_ghosts = 1
+        proximity_to_ghosts = 0
+        for ghost_state in gameState.getGhostPositions():
+            distance = util.manhattanDistance(newPos, ghost_state)
+            distances_to_ghosts += distance
+            if distance <= 2:
+                proximity_to_ghosts += 1
+
+        if proximity_to_ghosts < 1:
+            ratio = gameState.getNumFood()/self.total_food_num
+            if (float(ratio) >= float(self.threshold)):
+                move = self.system_2_model.getAction(gameState)
+            else:
+                move = self.system_1_model.getAction(gameState)
+        else:
+            move = self.system_2_model.getAction(gameState)
+        return move
