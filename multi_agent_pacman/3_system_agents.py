@@ -162,7 +162,7 @@ class System0Agent(Agent):
         # else:
         #     move = self.system_1_model.getAction(gameState)
         #########################################
-        
+
         # self.count = self.count + 1
         # if(self.system_1_model.getAction(gameState) != self.system_2_model.getAction(gameState)):
         #     print "Made a choice"
@@ -177,8 +177,11 @@ class System0Agent(Agent):
         return move
 
 class ProximityAgent(System0Agent):
-    def __init__(self):
+    def __init__(self,proxi_dist=2,escape_sys=2):
         System0Agent.__init__(self)
+        self.proxi_dist = float(proxi_dist)
+        self.escape_sys = int(escape_sys)
+        
     def getAction(self,gameState):
         # return self.system_1_model.getAction(gameState)
         newPos = gameState.getPacmanPosition()
@@ -187,18 +190,18 @@ class ProximityAgent(System0Agent):
         for ghost_state in gameState.getGhostPositions():
             distance = util.manhattanDistance(newPos, ghost_state)
             distances_to_ghosts += distance
-            if distance <= 2:
+            if distance <= self.proxi_dist:
                 proximity_to_ghosts += 1
         if proximity_to_ghosts < 1:
-            move = self.system_1_model.getAction(gameState)
-        else:
-            move = self.system_2_model.getAction(gameState)
-        # self.count = self.count + 1
-        # if(self.system_1_model.getAction(gameState) != self.system_2_model.getAction(gameState)):
-        #     print "Made a choice"
-        # print "SYSTEM1:" + self.system_1_model.getAction(gameState)
-        # print "SYSTEM2:" + self.system_2_model.getAction(gameState)
-        # print "Count:" + str(self.count)
+            if self.escape_sys == 2:
+                move = self.system_1_model.getAction(gameState)
+            else:
+                move = self.system_2_model.getAction(gameState)
+        else: #high proximity, escape
+            if self.escape_sys == 2:
+                move = self.system_2_model.getAction(gameState)
+            else:
+                move = self.system_1_model.getAction(gameState)
         return move
 
 class RandomChoiceAgent(System0Agent):
