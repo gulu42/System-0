@@ -41,6 +41,10 @@ touch $data_path'/proximity_agent.csv'
 python2 pacman.py -p ProximityAgent -n $n_games -l smallClassic -g DirectionalGhost -q --fname $data_path'/proximity_agent.csv'
 echo ">>>Proximity Agent - Complete<<<"
 
+touch $data_path'/proximity_agent.csv'
+python2 pacman.py -p ProximityAgent -n $n_games -l smallClassic -g DirectionalGhost -q --fname $data_path'/proximity_agent.csv'
+echo ">>>Proximity Agent - Complete<<<"
+
 touch $data_path'/random_choice_0.1.csv'
 python2 pacman.py -p RandomChoiceAgent -n 23 -l smallClassic -g DirectionalGhost -q -a prob_sys1=0.1 --fname $data_path'/random_choice_0.1.csv'
 echo '>>Random choice 0.1 - Complete<<'
